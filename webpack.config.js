@@ -6,10 +6,20 @@ const CopyWebpackPlugin = require("copy-webpack-plugin"); // Import the plugin
 const path = require("path");
 
 module.exports = {
+  mode: process.env.NODE_ENV || 'development',
   entry: {
-    index: glob.sync("./src/index.js")
+    index: "./src/index.js"
   },
   target: "web",
+  devServer: {
+    static: {
+      directory: path.join(__dirname, 'public'),
+    },
+    compress: true,
+    port: 3000,
+    hot: true,
+    open: true,
+  },
   module: {
     rules: [
       {
