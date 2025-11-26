@@ -2261,6 +2261,7 @@ render() {
             </div>
           </div>
         </div>
+          <Footer />
           <DialogComponent
             id="exportDialog"
             ref={exportDialog => this.exportDialog = exportDialog}
@@ -3322,5 +3323,41 @@ render() {
 
 
 }
+
+const Footer = () => (
+  <div className="footer">
+    <div className="footer-container">
+      <div className="diagram-icon">
+        <img
+          className="footer-logo"
+          src="/assets/dbstyle/common_images/Diagram_Component.svg"
+        />
+      </div>
+      <div className="footer-content">
+        <div className="title">
+          <span>
+            Want interactive diagramming in your app?
+          </span>
+          <span><strong className='main-title'> Try our Diagram Component</strong> — build, connect, and customize!</span>
+        </div>
+        <div className="buttons">
+          <button
+            type="button"
+            className="e-trial-btn e-btn e-primary e-icons"
+            onClick={() => window.open('https://www.syncfusion.com/downloads/react?tag=es-freetools-floor-planner-sample-ads-trial', '_blank')}
+          >
+          </button>
+          <button
+            type="button"
+            className="e-demo-btn e-btn"
+            onClick={() => window.open('https://www.syncfusion.com/request-demo?tag=es-freetools-floor-planner-sample-ads-demo', '_blank')}
+          >
+            Request Demo
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+);
 
 export default App;
