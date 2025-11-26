@@ -137,16 +137,17 @@ input, button, select, textarea {
 
 .sidebar {
     position: absolute;
-    bottom: 0;
-    width: 212;
+    top: 108px; /* header + menu area */
+    bottom: 72px; /* leave space for fixed footer */
     left: 0px;
-    height: calc(100% - 112px);
+    height: auto;
 }
 
 .main-content {
     margin: 0;
     left:255px;
-    height: calc(100% - 112px);
+    top: 115px; /* header + menu area */
+    bottom: 72px; /* footer height */
     position:absolute;
     width:calc(100% - 255px);
 }

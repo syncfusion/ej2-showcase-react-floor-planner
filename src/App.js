@@ -1565,74 +1565,77 @@ render() {
                 />
                 <span id="diagramreport" className="db-diagram-name db-save-text"></span>
               </div>
-              <div className="db-menu-container">
-                <div className="db-menu-style">
-                  <DropDownButtonComponent
-                    id="btnFileMenu"
-                    cssClass="db-dropdown-menu"
-                    items={this.dropDownDataSources.fileMenuItems}
-                    select={menuclick}
-                    beforeOpen={beforeOpen}
-                    beforeClose={beforeClose}
-                    beforeItemRender={beforItem}
-                  >
-                    File
-                  </DropDownButtonComponent>
+              <div className="db-menu-container" style={{display: 'flex', justifyContent: 'space-between'}}>
+                <div>
+                  <div className="db-menu-style">
+                    <DropDownButtonComponent
+                      id="btnFileMenu"
+                      cssClass="db-dropdown-menu"
+                      items={this.dropDownDataSources.fileMenuItems}
+                      select={menuclick}
+                      beforeOpen={beforeOpen}
+                      beforeClose={beforeClose}
+                      beforeItemRender={beforItem}
+                    >
+                      File
+                    </DropDownButtonComponent>
+                  </div>
+                  <div className="db-menu-style">
+                    <DropDownButtonComponent
+                      id="btnEditMenu"
+                      cssClass="db-dropdown-menu"
+                      items={this.dropDownDataSources.editMenuItems}
+                      select={menuclick}
+                      beforeOpen={beforeOpen}
+                      beforeClose={beforeClose}
+                      beforeItemRender={beforItem}
+                    >
+                      Edit
+                    </DropDownButtonComponent>
+                  </div>
+                  <div className="db-menu-style">
+                    <DropDownButtonComponent
+                      id="btnInsertMenu"
+                      cssClass="db-dropdown-menu"
+                      items={this.dropDownDataSources.insertMenuItems}
+                      select={menuclick1}
+                      beforeOpen={beforeOpen}
+                      beforeClose={beforeClose}
+                      beforeItemRender={beforItem}
+                    >
+                      Insert
+                    </DropDownButtonComponent>
+                  </div>
+                  <div className="db-menu-style">
+                    <DropDownButtonComponent
+                      id="btnDesignMenu"
+                      cssClass="db-dropdown-menu"
+                      target='.e-contextmenu-wrapper.designMenu'
+                      items={this.dropDownDataSources.arrangeMenuItems}
+                      select={menuclick}
+                      beforeOpen={beforeOpen}
+                      beforeClose={beforeClose}
+                      beforeItemRender={beforItem}
+                      
+                    >
+                      Design
+                    </DropDownButtonComponent>
+                  </div>
+                  <div className="db-menu-style">
+                    <DropDownButtonComponent
+                      id="btnViewMenu"
+                      cssClass="db-dropdown-menu"
+                      items={this.dropDownDataSources.viewMenuItems}
+                      select={menuclick}
+                      beforeOpen={beforeOpen}
+                      beforeClose={beforeClose}
+                      beforeItemRender={beforItem}
+                    >
+                      View
+                    </DropDownButtonComponent>
+                  </div>
                 </div>
-                <div className="db-menu-style">
-                  <DropDownButtonComponent
-                    id="btnEditMenu"
-                    cssClass="db-dropdown-menu"
-                    items={this.dropDownDataSources.editMenuItems}
-                    select={menuclick}
-                    beforeOpen={beforeOpen}
-                    beforeClose={beforeClose}
-                    beforeItemRender={beforItem}
-                  >
-                    Edit
-                  </DropDownButtonComponent>
-                </div>
-                <div className="db-menu-style">
-                  <DropDownButtonComponent
-                    id="btnInsertMenu"
-                    cssClass="db-dropdown-menu"
-                    items={this.dropDownDataSources.insertMenuItems}
-                    select={menuclick1}
-                    beforeOpen={beforeOpen}
-                    beforeClose={beforeClose}
-                    beforeItemRender={beforItem}
-                  >
-                    Insert
-                  </DropDownButtonComponent>
-                </div>
-                <div className="db-menu-style">
-                  <DropDownButtonComponent
-                    id="btnDesignMenu"
-                    cssClass="db-dropdown-menu"
-                    target='.e-contextmenu-wrapper.designMenu'
-                    items={this.dropDownDataSources.arrangeMenuItems}
-                    select={menuclick}
-                    beforeOpen={beforeOpen}
-                    beforeClose={beforeClose}
-                    beforeItemRender={beforItem}
-                    
-                  >
-                    Design
-                  </DropDownButtonComponent>
-                </div>
-                <div className="db-menu-style">
-                  <DropDownButtonComponent
-                    id="btnViewMenu"
-                    cssClass="db-dropdown-menu"
-                    items={this.dropDownDataSources.viewMenuItems}
-                    select={menuclick}
-                    beforeOpen={beforeOpen}
-                    beforeClose={beforeClose}
-                    beforeItemRender={beforItem}
-                  >
-                    View
-                  </DropDownButtonComponent>
-                </div>
+                <div className="promotion-text"><img style={{marginRight:'7px', filter: 'brightness(0) invert(1)'}} src="/assets/dbstyle/common_images/Syncfusion_Logo.svg" />Powered by&nbsp;<a style={{textDecoration: 'none', color:'#fff30f'}} href="https://www.syncfusion.com/react-components/react-diagram?tag=es-freetools-floor-planner-sample-ft" target="_blank">Syncfusion Diagram Component</a></div>
               </div>
             </div>
             <div className='db-toolbar-editor'>
@@ -2261,6 +2264,7 @@ render() {
             </div>
           </div>
         </div>
+          <Footer />
           <DialogComponent
             id="exportDialog"
             ref={exportDialog => this.exportDialog = exportDialog}
@@ -3322,5 +3326,41 @@ render() {
 
 
 }
+
+const Footer = () => (
+  <div className="footer">
+    <div className="footer-container">
+      <div className="diagram-icon">
+        <img
+          className="footer-logo"
+          src="/assets/dbstyle/common_images/Diagram_Component.svg"
+        />
+      </div>
+      <div className="footer-content">
+        <div className="title">
+          <span>
+            Want interactive diagramming in your app?
+          </span>
+          <span><strong className='main-title'> Try our Diagram Component</strong> — build, connect, and customize!</span>
+        </div>
+        <div className="buttons">
+          <button
+            type="button"
+            className="e-trial-btn e-btn e-primary e-icons"
+            onClick={() => window.open('https://www.syncfusion.com/downloads/react?tag=es-freetools-floor-planner-sample-ads-trial', '_blank')}
+          >
+          </button>
+          <button
+            type="button"
+            className="e-demo-btn e-btn"
+            onClick={() => window.open('https://www.syncfusion.com/request-demo?tag=es-freetools-floor-planner-sample-ads-demo', '_blank')}
+          >
+            Request Demo
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+);
 
 export default App;
