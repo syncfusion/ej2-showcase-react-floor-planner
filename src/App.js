@@ -1635,7 +1635,7 @@ render() {
                     </DropDownButtonComponent>
                   </div>
                 </div>
-                <div className="promotion-text"><img style={{marginRight:'7px', filter: 'brightness(0) invert(1)'}} src="/assets/dbstyle/common_images/Syncfusion_Logo.svg" />Powered by&nbsp;<a style={{textDecoration: 'none', color:'#fff30f'}} href="https://www.syncfusion.com/react-components/react-diagram?tag=es-freetools-floor-planner-sample-ft" target="_blank">Syncfusion Diagram Component</a></div>
+                <div className="promotion-text"><img style={{marginRight:'7px', filter: 'brightness(0) invert(1)'}} src="/assets/dbstyle/common_images/Syncfusion_Logo.svg" />Powered by&nbsp;<a className="free-tools-sample-explore-btn" style={{textDecoration: 'none', color:'#fff30f'}} href="https://www.syncfusion.com/react-components/react-diagram?tag=es-freetools-floor-planner-sample-ft" target="_blank">Syncfusion Diagram Component</a></div>
               </div>
             </div>
             <div className='db-toolbar-editor'>
