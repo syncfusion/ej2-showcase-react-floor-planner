@@ -1,4 +1,5 @@
-import { Node, Connector, ShapeAnnotation, PathAnnotation } from "@syncfusion/ej2-diagrams";
+import { Node, Connector, ShapeAnnotation, PathAnnotation, DiagramConstraints } from "@syncfusion/ej2-diagrams";
+import { SnapConstraints } from "@syncfusion/ej2-react-diagrams";
 
 export class DiagramClientSideEvents {
     constructor(selectedItem) {
@@ -12,13 +13,27 @@ export class DiagramClientSideEvents {
     selectionChange(args) {
         const diagram = document.getElementById("diagram").ej2_instances[0];
         const toolbarEditor = document.getElementById("toolbarEditor").ej2_instances[0];
-
         if (this.selectedItem.preventSelectionChange || this.selectedItem.isLoading) {
             return;
         }
 
         if (args.state === "Changed") {
             let selectedItems = diagram.selectedItems.nodes;
+            if (args.newValue && args.newValue[0] && args.newValue[0] instanceof Connector) {
+                document.getElementById("connectorOpacity").ej2_instances[0].value = args.newValue[0].style.opacity * 100;
+            }
+            if (args.newValue && args.newValue[0] && args.newValue[0] instanceof Node) {
+                document.getElementById("nodeOpacity").ej2_instances[0].value = args.newValue[0].style.opacity * 100;
+            }
+            let insertImageDiv = document.getElementById("insertImageDiv");
+            if (insertImageDiv && selectedItems[0] && selectedItems[0].children && selectedItems[0].children.length > 0) {
+                insertImageDiv.style.opacity = 0.5;
+                insertImageDiv.style.pointerEvents = 'none';
+            }
+            else if (insertImageDiv) {
+               insertImageDiv.style.opacity = 1;
+               insertImageDiv.style.pointerEvents = 'all';
+            }
             selectedItems = selectedItems.concat(diagram.selectedItems.connectors);
             this.selectedItem.utilityMethods.enableToolbarItems(selectedItems);
 
@@ -52,7 +67,7 @@ export class DiagramClientSideEvents {
                 }
             } else {
                 this.selectedItem.utilityMethods.objectTypeChange("diagram");
-                for (var k = 7; k <= 28; k++) {
+                for (var k = 7; k <= 27; k++) {
                     toolbarEditor.items[k].visible = false;
                 }
             }
@@ -76,23 +91,20 @@ export class DiagramClientSideEvents {
         });
 
         let selectItem1 = document.getElementById("diagram").ej2_instances[0].selectedItems;
-
+        let textNode;
         if (showNodePanel) {
             nodeContainer.style.display = "";
             nodeContainer.classList.add("multiple");
             if (showConnectorPanel) {
                 nodeContainer.classList.add("connector");
             }
-            this.selectedItem.utilityMethods.bindNodeProperties(selectItem1.nodes[0], this.selectedItem);
+            this.selectedItem.utilityMethods.bindNodeProperties(selectItem1.nodes[0], this.selectedItem, true);
         }
         if (showConnectorPanel && !showNodePanel) {
             document.getElementById("connectorPropertyContainer").style.display = "";
-            this.selectedItem.utilityMethods.bindConnectorProperties(selectItem1.connectors[0], this.selectedItem);
+            this.selectedItem.utilityMethods.bindConnectorProperties(selectItem1.connectors[0], this.selectedItem, true);
         }
         if (showTextPanel || showConTextPanel) {
-            document.getElementById("textPropertyContainer").style.display = "";
-            document.getElementById("textPositionDiv").style.display = showTextPanel && showConTextPanel ? "none" : "";
-            document.getElementById("textColorDiv").className = showConTextPanel ? "col-xs-6 db-col-left" : "col-xs-6 db-col-right";
             
             if (showConTextPanel) {
                 this.ddlTextPosition.dataSource = this.selectedItem.textProperties.getConnectorTextPositions();
@@ -100,6 +112,42 @@ export class DiagramClientSideEvents {
                 this.ddlTextPosition.dataSource = this.selectedItem.textProperties.getNodeTextPositions();
             }
             this.ddlTextPosition.dataBind();
+            let labelNode;
+            if (selectItem1.nodes && selectItem1.nodes.length > 0) {
+                labelNode = selectItem1.nodes.find(node=>node.annotations && node.annotations.length > 0 && node.annotations[0].content);
+                if (labelNode) {
+                    let el = document.getElementById("textPropertyContainer");
+                    el.style.display = "";
+                    document.getElementById("toolbarTextAlignmentDiv").style.display = "";
+                    document.getElementById("textPositionDiv").style.opacity = 1;
+                    document.getElementById("textPositionDiv").style.pointerEvents = 'all';
+                    document.getElementById("textPositionText").style.opacity = 1;
+                    // Reset opacity controls for non-text nodes
+                    const opacitySlider = document.getElementById('textOpacityProperty');
+                    if (opacitySlider) {
+                        opacitySlider.style.visibility = 'visible';
+                    }
+                    this.selectedItem.utilityMethods.bindTextProperties(labelNode.annotations[0].style, this.selectedItem);
+                    this.selectedItem.utilityMethods.updateHorVertAlign(labelNode.annotations[0].horizontalAlignment, labelNode.annotations[0].verticalAlignment);
+                }
+            }
+        }
+        if (selectItem1.nodes && selectItem1.nodes.length > 0) {
+            textNode = selectItem1.nodes.find(node=> node.shape && node.shape.type === "Text");
+            if (textNode) {
+                let el = document.getElementById("textPropertyContainer");
+                el.style.display = "";
+                document.getElementById("toolbarTextAlignmentDiv").style.display = "none";
+                document.getElementById("textPositionDiv").style.opacity = 0.5;
+                document.getElementById("textPositionDiv").style.pointerEvents = 'none';
+                document.getElementById("textPositionText").style.opacity = 0.5;
+                // Disable opacity slider and text input
+                const opacitySlider = document.getElementById('textOpacityProperty');
+                if (opacitySlider) {
+                    opacitySlider.style.visibility = 'hidden';
+                }
+                this.selectedItem.utilityMethods.bindTextProperties(textNode.style, this.selectedItem);
+            }
         }
     }
 
@@ -120,15 +168,27 @@ export class DiagramClientSideEvents {
             let el = document.getElementById("textPropertyContainer");
             el.style.display = "";
             document.getElementById("toolbarTextAlignmentDiv").style.display = "none";
-            document.getElementById("textPositionDiv").style.display = "none";
-            document.getElementById("textColorDiv").className = "col-xs-6 db-col-left";
+            document.getElementById("textPositionDiv").style.opacity = 0.5;
+            document.getElementById("textPositionDiv").style.pointerEvents = 'none';
+            document.getElementById("textPositionText").style.opacity = 0.5;
+            // Disable opacity slider and text input
+            const opacitySlider = document.getElementById('textOpacityProperty');
+            if (opacitySlider) {
+                opacitySlider.style.visibility = 'hidden';
+            }
             this.selectedItem.utilityMethods.bindTextProperties(object.style, this.selectedItem);
         } else if (object.annotations.length > 0 && object.annotations[0].content) {
             let el = document.getElementById("textPropertyContainer");
             el.style.display = "";
             document.getElementById("toolbarTextAlignmentDiv").style.display = "";
-            document.getElementById("textPositionDiv").style.display = "";
-            document.getElementById("textColorDiv").className = "col-xs-6 db-col-right";
+            document.getElementById("textPositionDiv").style.opacity = 1;
+            document.getElementById("textPositionDiv").style.pointerEvents = 'all';
+            document.getElementById("textPositionText").style.opacity = 1;
+             // Reset opacity controls for non-text nodes
+            const opacitySlider = document.getElementById('textOpacityProperty');
+            if (opacitySlider) {
+                opacitySlider.style.visibility = 'visible';
+            }
             this.selectedItem.utilityMethods.bindTextProperties(object.annotations[0].style, this.selectedItem);
             this.selectedItem.utilityMethods.updateHorVertAlign(object.annotations[0].horizontalAlignment, object.annotations[0].verticalAlignment);
             if (object.annotations[0] instanceof ShapeAnnotation) {
@@ -348,15 +408,24 @@ export class DiagramClientSideEvents {
     historyChange(args) {
         const diagram = document.getElementById("diagram").ej2_instances[0];
         const toolbarContainer = document.getElementsByClassName("db-toolbar-container")[0];
+        const toolbarEditor = document.getElementById("toolbarEditor").ej2_instances[0];
         toolbarContainer.classList.remove("db-undo");
         toolbarContainer.classList.remove("db-redo");
 
         if (diagram.historyManager.undoStack.length > 0) {
             toolbarContainer.classList.add("db-undo");
+            toolbarEditor.items[0].disabled = false;
+        }
+        else {
+            toolbarEditor.items[0].disabled = true;
         }
 
         if (diagram.historyManager.redoStack.length > 0) {
             toolbarContainer.classList.add("db-redo");
+            toolbarEditor.items[1].disabled = false;
+        }
+        else {
+            toolbarEditor.items[1].disabled = true;
         }
     }
 
@@ -371,19 +440,58 @@ export class DiagramPropertyBinding {
 
     // Updates page break settings and icons in response to checkbox changes
     pageBreaksChange(args) {
-        const items = document.getElementById("btnViewMenu").ej2_instances[0].items;
+        const diagram = this.selectedItem.selectedDiagram;
+        diagram.constraints = diagram.constraints &= ~ DiagramConstraints.UndoRedo;
+        const btnViewMenu = document.getElementById('diagram-menu').ej2_instances[0];
+        const items = btnViewMenu.items[4].items;
         if (args.event) {
             this.selectedItem.pageSettings.pageBreaks = args.checked;
             this.selectedItem.selectedDiagram.pageSettings.showPageBreaks = args.checked;
-            items[5].iconCss = args.checked === true ? 'sf-icon-check-tick' : '';
+            items[4].iconCss = args.checked === true ? 'sf-icon-check-tick' : '';
         }
+        diagram.dataBind();
+        diagram.constraints = diagram.constraints |= DiagramConstraints.UndoRedo;
+    }
+
+    diagramPropertiesChange(args) {
+        const diagram = this.selectedItem.selectedDiagram;
+        diagram.constraints = diagram.constraints &= ~ DiagramConstraints.UndoRedo;
+        const btnViewMenu = document.getElementById('diagram-menu').ej2_instances[0];
+        const items = btnViewMenu.items[3].items;
+        if (args.event) {
+             let command = (args.event.currentTarget.textContent.replace(/[" "]/g, "").toLowerCase());
+                switch(command){
+                case 'showrulers':
+                    diagram.rulerSettings.showRulers = args.checked;
+                    items[0].iconCss = args.checked === true ? 'sf-icon-check-tick' : '';
+                    break;
+                case 'showgrid':
+                    diagram.snapSettings.constraints = diagram.snapSettings.constraints ^ SnapConstraints.ShowLines;
+                    items[1].iconCss = args.checked === true ? 'sf-icon-check-tick' : '';
+                    break;
+                case 'snaptogrid':
+                    diagram.snapSettings.constraints = diagram.snapSettings.constraints ^ SnapConstraints.SnapToLines;
+                    items[2].iconCss = args.checked === true ? 'sf-icon-check-tick' : '';
+                    break;
+                case 'showguides':
+                    diagram.snapSettings.constraints = diagram.snapSettings.constraints ^ SnapConstraints.SnapToObject;
+                    items[3].iconCss = args.checked === true ? 'sf-icon-check-tick' : '';
+                    break;
+                default:
+                    break;
+                }
+        }
+        diagram.dataBind();
+        diagram.constraints = diagram.constraints |= DiagramConstraints.UndoRedo;
     }
 
     // Adjusts diagram page settings based on selected paper size
     paperListChange(args) {
         const diagram = this.selectedItem.selectedDiagram;
+        diagram.constraints = diagram.constraints &= ~ DiagramConstraints.UndoRedo;
         document.getElementById('pageDimension').style.display = 'none';
         document.getElementById('pageOrientation').style.display = '';
+        const viewmenu = document.getElementById('diagram-menu').ej2_instances[0];
         const value = args.value || args.item.value;
         const paperSize = this.selectedItem.utilityMethods.getPaperSize(value);
         let pageWidth = paperSize.pageWidth;
@@ -408,9 +516,9 @@ export class DiagramPropertyBinding {
             diagram.pageSettings.width = 1460;
             diagram.pageSettings.height = 600;
         }
-        const designContextMenu = document.getElementById('designContextMenu').ej2_instances[0];
-        this.updatePaperSelection(designContextMenu.items[1],value);
+        this.updatePaperSelection(viewmenu.items[3].items[1],value);
         diagram.dataBind();
+        diagram.constraints = diagram.constraints |= DiagramConstraints.UndoRedo;
     }
 
     // Updates the selection icon in the menu for paper sizes
@@ -470,19 +578,24 @@ export class DiagramPropertyBinding {
     pageOrientationChange(args) {
         if (args.target) {
             const target = args.target;
-            const arrangeContextMenu = document.getElementById('designContextMenu').ej2_instances[0];
+            const arrangeContextMenu = document.getElementById('diagram-menu').ej2_instances[0];
             const diagram = this.selectedItem.selectedDiagram;
-            const items = arrangeContextMenu.items;
+            diagram.constraints = diagram.constraints &= ~DiagramConstraints.UndoRedo;
+            const items = arrangeContextMenu.items[3].items;
             const option = target.id ? target.id : (args.currentTarget.ej2_instances[0].iconCss === 'sf-icon-portrait' ? 'pagePortrait' : 'pageLandscape');
             switch (option) {
                 case 'pagePortrait':
                     diagram.pageSettings.orientation = 'Portrait';
+                    this.selectedItem.pageSettings.isPortrait = true;
+                    this.selectedItem.pageSettings.isLandscape = false;
                     items[0].items[0].iconCss = '';
                     items[0].items[1].iconCss = 'sf-icon-check-tick';
                     document.getElementById('pageLandscape').classList.remove('e-active');
                     break;
                 case 'pageLandscape':
                     diagram.pageSettings.orientation = 'Landscape';
+                    this.selectedItem.pageSettings.isPortrait = false;
+                    this.selectedItem.pageSettings.isLandscape = true;
                     items[0].items[0].iconCss = 'sf-icon-check-tick';
                     items[0].items[1].iconCss = '';
                     document.getElementById('pagePortrait').classList.remove('e-active');
@@ -491,6 +604,7 @@ export class DiagramPropertyBinding {
                     break;
             }
             diagram.dataBind();
+            diagram.constraints = diagram.constraints |= DiagramConstraints.UndoRedo;
         }
     }
 
@@ -498,8 +612,10 @@ export class DiagramPropertyBinding {
     pageBackgroundChange1(args) {
         if (args.currentValue) {
             const diagram = this.selectedItem.selectedDiagram;
+            diagram.constraints = diagram.constraints &= ~DiagramConstraints.UndoRedo;
             diagram.pageSettings.background = { color: args.currentValue.rgba };
             diagram.dataBind();
+            diagram.constraints = diagram.constraints |= DiagramConstraints.UndoRedo;
         }
     }
 
@@ -523,7 +639,14 @@ export class DiagramPropertyBinding {
 
     // Sets text alignment properties from toolbar settings
     toolbarTextAlignChange(args) {
-        const propertyName = args.item.tooltipText.replace("Align ", "");
+        let propertyName = args.item.tooltipText.replace("Align ", "");
+        const directionMap = {
+            Left: "Right",
+            Right: "Left",
+            Top: "Bottom",
+            Bottom: "Top"
+        };
+        propertyName = directionMap[propertyName] || propertyName;
         this.textPropertyChange(propertyName, propertyName);
     }
 

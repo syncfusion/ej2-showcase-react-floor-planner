@@ -1,10 +1,10 @@
 import { closest, formatUnit } from "@syncfusion/ej2-base";
-import { DiagramComponent, SymbolPaletteComponent, DiagramTools, NodeConstraints, ConnectorConstraints, UndoRedo, DiagramContextMenu, Snapping, DataBinding, PrintAndExport, BpmnDiagrams, ConnectorBridging, LayoutAnimation, SymbolPalette, FlipDirection } from "@syncfusion/ej2-react-diagrams";
-import { Diagram, SnapConstraints } from "@syncfusion/ej2-react-diagrams";
+import { DiagramComponent, SymbolPaletteComponent, DiagramTools, NodeConstraints, ConnectorConstraints, UndoRedo, DiagramContextMenu, Snapping, DataBinding, PrintAndExport, BpmnDiagrams, ConnectorBridging, LayoutAnimation, SymbolPalette, FlipDirection, Keys, KeyModifiers } from "@syncfusion/ej2-react-diagrams";
+import { Diagram, SnapConstraints, DiagramConstraints, Connector, randomId } from "@syncfusion/ej2-react-diagrams";
 import { DropDownButtonComponent } from "@syncfusion/ej2-react-splitbuttons";
 import { DiagramClientSideEvents } from "./script/events";
 import { DialogComponent } from "@syncfusion/ej2-react-popups";
-import { ToolbarComponent, ItemsDirective, ItemDirective, ContextMenuComponent } from '@syncfusion/ej2-react-navigations';
+import { ToolbarComponent, ItemsDirective, ItemDirective, ContextMenuComponent ,MenuComponent} from '@syncfusion/ej2-react-navigations';
 import * as React from 'react';
 import { NumericTextBoxComponent, ColorPickerComponent, SliderComponent } from "@syncfusion/ej2-react-inputs";
 import { Uploader, UploaderComponent } from '@syncfusion/ej2-react-inputs';
@@ -51,20 +51,40 @@ export let nodeBorderChange;
 export let strokeWidthChange;
 export let fontOpacityChange;
 export let toolbarInsertClick;
+export let diagramInstance;
+let clipboardObjects;
+
+  //Function To save the diagram
+  function download(data) {
+    if (window.navigator.msSaveBlob) {
+      let blob = new Blob([data], { type: 'data:text/json;charset=utf-8,' });
+      window.navigator.msSaveOrOpenBlob(blob, 'Diagram.json');
+    }
+    else {
+      let dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(data);
+      let a = document.createElement('a');
+      a.href = dataStr;
+      a.download = document.getElementById('diagramName') ? document.getElementById('diagramName').innerHTML ? document.getElementById('diagramName').innerHTML + '.json' : 'Untitled Diagram.json' : 'Untitled Diagram.json';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    }
+  }
+
 class App extends React.Component {
   constructor(props) {
     super(props);
     this.dropdownListFields = { text: 'text', value: 'value' };
      this.showPageBreaks = {};
-    this.pageSettings = {
-       background: { color: '#FFFFFF' }, width: 1016, height: 1056, multiplePage: false, margin: { left: 5, top: 5 },
-    orientation: 'Landscape', showPageBreaks: false
-    };
+    // this.pageSettings = {
+    //    background: { color: '#FFFFFF' }, width: 1016, height: 1056, multiplePage: false, margin: { left: 5, top: 5 },
+    // orientation: 'Landscape', showPageBreaks: false
+    // };
     this.nodes = [
       {
         id :'room1window',
-        offsetX: 118,
-        offsetY: 10,
+        offsetX: 378,
+        offsetY: 190,
         // Size of the node
         width: 87,
         height: 4,
@@ -72,8 +92,8 @@ class App extends React.Component {
       },
       {
         id :'room1window2',
-        offsetX: 20,
-        offsetY: 110,
+        offsetX: 280,
+        offsetY: 290,
         // Size of the node
         width: 59,
         height: 4,
@@ -82,8 +102,8 @@ class App extends React.Component {
       },
       {
         id :'node2',
-        offsetX: 212,
-        offsetY: 181,
+        offsetX: 472,
+        offsetY: 361,
         // Size of the node
         width: 51,
         height: 38,
@@ -91,8 +111,8 @@ class App extends React.Component {
       },
       {
         id :'room1Bed',
-        offsetX: 71,
-        offsetY: 103,
+        offsetX: 331,
+        offsetY: 283,
         // Size of the node
         width: 68,
         height: 87,
@@ -101,8 +121,8 @@ class App extends React.Component {
       },
       {
         id :'room1Table',
-        offsetX: 41,
-        offsetY: 166,
+        offsetX: 301,
+        offsetY: 346,
         // Size of the node
         width: 26,
         height: 28,
@@ -110,8 +130,8 @@ class App extends React.Component {
       },
       {
         id :'room1PotTable',
-        offsetX: 41,
-        offsetY: 40,
+        offsetX: 301,
+        offsetY: 220,
         // Size of the node
         width: 30,
         height: 30,
@@ -119,8 +139,8 @@ class App extends React.Component {
       },
       {
         id :'room1FlowerPot',
-        offsetX: 41,
-        offsetY: 40,
+        offsetX: 301,
+        offsetY: 220,
         // Size of the node
         width: 25,
         height: 25,
@@ -128,8 +148,8 @@ class App extends React.Component {
       },
       {
         id :'room1Bookcase',
-        offsetX: 224,
-        offsetY: 45,
+        offsetX: 484,
+        offsetY: 225,
         // Size of the node
         width: 63,
         height: 22,
@@ -138,8 +158,8 @@ class App extends React.Component {
       },
       {
         id :'room1WorkTable',
-        offsetX: 215,
-        offsetY: 118,
+        offsetX: 475,
+        offsetY: 298,
         // Size of the node
         width: 43,
         height: 37,
@@ -148,8 +168,8 @@ class App extends React.Component {
       },
       {
         id :'room1Laptop',
-        offsetX: 215,
-        offsetY: 118,
+        offsetX: 475,
+        offsetY: 298,
         // Size of the node
         width: 30,
         height: 30,
@@ -158,8 +178,8 @@ class App extends React.Component {
       },
       {
         id :'room1Chair',
-        offsetX: 178,
-        offsetY: 116,
+        offsetX: 438,
+        offsetY: 296,
         // Size of the node
         width: 28,
         height: 32,
@@ -168,8 +188,8 @@ class App extends React.Component {
       },
       {
         id :'room1Lamp',
-        offsetX: 41,
-        offsetY:166,
+        offsetX: 301,
+        offsetY: 346,
         // Size of the node
         width: 20,
         height: 20,
@@ -177,8 +197,8 @@ class App extends React.Component {
       },
       {
         id :'room1ToiletDoor',
-        offsetX: 169,
-        offsetY: 214,
+        offsetX: 429,
+        offsetY: 394,
         // Size of the node
         width: 28,
         height: 30,
@@ -187,8 +207,8 @@ class App extends React.Component {
       },
       {
         id :'room1Warddrobe',
-        offsetX: 119,
-        offsetY: 176,
+        offsetX: 379,
+        offsetY: 356,
         // Size of the node
         width: 73,
         height: 35,
@@ -197,8 +217,8 @@ class App extends React.Component {
       },
       {
         id :'toilet1BathTub',
-        offsetX: 88,
-        offsetY: 263,
+        offsetX: 348,
+        offsetY: 443,
         // Size of the node
         width: 50,
         height: 25,
@@ -206,8 +226,8 @@ class App extends React.Component {
       },
       {
         id :'toilet1Basin',
-        offsetX: 158,
-        offsetY: 263,
+        offsetX: 418,
+        offsetY: 443,
         // Size of the node
         width: 30,
         height: 25,
@@ -216,8 +236,8 @@ class App extends React.Component {
       },
       {
         id :'toilet1Faucet',
-        offsetX: 43,
-        offsetY: 222,
+        offsetX: 303,
+        offsetY: 402,
         // Size of the node
         width: 23,
         height: 36,
@@ -226,8 +246,8 @@ class App extends React.Component {
       },
       {
         id :'room2ToiletDoor',
-        offsetX: 168,
-        offsetY: 336,
+        offsetX: 428,
+        offsetY: 516,
         // Size of the node
         width: 27,
         height: 30,
@@ -236,8 +256,8 @@ class App extends React.Component {
       },
       {
         id :'toilet2BathTub',
-        offsetX: 85,
-        offsetY: 332,
+        offsetX: 345,
+        offsetY: 512,
         // Size of the node
         width: 50,
         height: 25,
@@ -245,8 +265,8 @@ class App extends React.Component {
       },
       {
         id :'toilet2Basin',
-        offsetX: 157,
-        offsetY: 298 ,
+        offsetX: 417,
+        offsetY: 478 ,
         // Size of the node
         width: 30,
         height: 25,
@@ -254,8 +274,8 @@ class App extends React.Component {
       },
       {
         id :'toilet2Faucet',
-        offsetX: 42,
-        offsetY: 305,
+        offsetX: 302,
+        offsetY: 485,
         // Size of the node
         width: 23,
         height: 37,
@@ -264,8 +284,8 @@ class App extends React.Component {
       },
       {
         id :'room2Window',
-        offsetX: 118,
-        offsetY: 481,
+        offsetX: 378,
+        offsetY: 661,
         // Size of the node
         width: 80,
         height: 4,
@@ -273,8 +293,8 @@ class App extends React.Component {
       },
       {
         id :'room2Window2',
-        offsetX: 20,
-        offsetY: 396,
+        offsetX: 280,
+        offsetY: 576,
         // Size of the node
         width: 51,
         height: 4,
@@ -283,8 +303,8 @@ class App extends React.Component {
       },
       {
         id :'room2Door',
-        offsetX: 212,
-        offsetY:300,
+        offsetX: 472,
+        offsetY: 480,
         // Size of the node
         width: 52,
         height: 38,
@@ -294,8 +314,8 @@ class App extends React.Component {
       },
       {
         id :'room2Bed',
-        offsetX: 69,
-        offsetY: 402,
+        offsetX: 329,
+        offsetY: 582,
         // Size of the node
         width: 44,
         height: 87,
@@ -304,8 +324,8 @@ class App extends React.Component {
       },
       {
         id :'room2Table',
-        offsetX: 210,
-        offsetY: 464,
+        offsetX: 470,
+        offsetY: 644,
         // Size of the node
         width: 37,
         height: 25,
@@ -313,8 +333,8 @@ class App extends React.Component {
       },
       {
         id :'room2LampTable',
-        offsetX: 38,
-        offsetY: 452,
+        offsetX: 298,
+        offsetY: 632,
         // Size of the node
         width: 26,
         height: 28,
@@ -322,8 +342,8 @@ class App extends React.Component {
       },
       {
         id :'room2Chair',
-        offsetX: 210,
-        offsetY: 436,
+        offsetX: 470,
+        offsetY: 616,
         // Size of the node
         width: 25,
         height: 25,
@@ -331,8 +351,8 @@ class App extends React.Component {
       },
       {
         id :'room2Lamp',
-        offsetX: 38,
-        offsetY:452,
+        offsetX: 298,
+        offsetY: 632,
         // Size of the node
         width: 20,
         height: 20,
@@ -340,8 +360,8 @@ class App extends React.Component {
       },
       {
         id :'room2Warddrobe',
-        offsetX: 216,
-        offsetY: 378,
+        offsetX: 476,
+        offsetY: 558,
         // Size of the node
         width: 73,
         height: 35,
@@ -350,8 +370,8 @@ class App extends React.Component {
       },
       {
         id :'mainDoor',
-        offsetX: 320,
-        offsetY:371,
+        offsetX: 580,
+        offsetY: 551,
         // Size of the node
         width: 76,
         height: 63,
@@ -359,8 +379,8 @@ class App extends React.Component {
       },
       {
         id :'window',
-        offsetX: 490,
-        offsetY:399,
+        offsetX: 750,
+        offsetY: 579,
         // Size of the node
         width: 100,
         height: 5,
@@ -368,8 +388,8 @@ class App extends React.Component {
       },
       {
         id :'sofa',
-        offsetX: 480,
-        offsetY:370,
+        offsetX: 740,
+        offsetY: 560,
         // Size of the node
         width: 102,
         height: 36,
@@ -378,8 +398,8 @@ class App extends React.Component {
       },
       {
         id :'doubleSofa',
-        offsetX: 479,
-        offsetY:298,
+        offsetX: 739,
+        offsetY: 478,
         // Size of the node
         width: 100,
         height: 35,
@@ -388,8 +408,8 @@ class App extends React.Component {
       },
       {
         id :'singleSofa',
-        offsetX: 405,
-        offsetY:333,
+        offsetX: 665,
+        offsetY: 513,
         // Size of the node
         width: 30,
         height: 30,
@@ -398,8 +418,8 @@ class App extends React.Component {
       },
       {
         id :'sofaTable',
-        offsetX: 480,
-        offsetY:336,
+        offsetX: 740,
+        offsetY: 516,
         // Size of the node
         width: 33,
         height: 20,
@@ -407,8 +427,8 @@ class App extends React.Component {
       },
       {
         id :'flatTV',
-        offsetX: 573,
-        offsetY:337,
+        offsetX: 833,
+        offsetY: 517,
         // Size of the node
         width: 68,
         height: 9,
@@ -417,8 +437,8 @@ class App extends React.Component {
       },
       {
         id :'plantTable',
-        offsetX: 395,
-        offsetY:376,
+        offsetX: 655,
+        offsetY: 556,
         // Size of the node
         width: 33,
         height: 27,
@@ -426,8 +446,8 @@ class App extends React.Component {
       },
       {
         id :'plant',
-        offsetX: 395,
-        offsetY:376,
+        offsetX: 655,
+        offsetY: 556,
         // Size of the node
         width: 22,
         height: 20,
@@ -435,8 +455,8 @@ class App extends React.Component {
       },
       {
         id :'diningTable',
-        offsetX: 370,
-        offsetY:176,
+        offsetX: 630,
+        offsetY: 356,
         // Size of the node
         width: 100,
         height: 90,
@@ -444,8 +464,8 @@ class App extends React.Component {
       },
       {
         id :'room3Door',
-        offsetX: 607,
-        offsetY:298,
+        offsetX: 867,
+        offsetY: 478,
         // Size of the node
         width: 52,
         height: 38,
@@ -454,8 +474,8 @@ class App extends React.Component {
       },
       {
         id :'room3Window',
-        offsetX: 740,
-        offsetY: 480,
+        offsetX: 1000,
+        offsetY: 660,
         // Size of the node
         width: 80,
         height: 4,
@@ -463,8 +483,8 @@ class App extends React.Component {
       },
       {
         id :'room3Bed',
-        offsetX: 812,
-        offsetY: 385,
+        offsetX: 1072,
+        offsetY: 565,
         // Size of the node
         width: 68,
         height: 87,
@@ -473,8 +493,8 @@ class App extends React.Component {
       },
       {
         id :'room3Table',
-        offsetX: 842,
-        offsetY: 325,
+        offsetX: 1102,
+        offsetY: 505,
         // Size of the node
         width: 26,
         height: 28,
@@ -482,8 +502,8 @@ class App extends React.Component {
       },
       {
         id :'room3PotTable',
-        offsetX: 841,
-        offsetY: 455,
+        offsetX: 1101,
+        offsetY: 635,
         // Size of the node
         width: 30,
         height: 30,
@@ -491,8 +511,8 @@ class App extends React.Component {
       },
       {
         id :'room3FlowerPot',
-        offsetX: 841,
-        offsetY: 455,
+        offsetX: 1101,
+        offsetY: 635,
         // Size of the node
         width: 25,
         height: 25,
@@ -500,8 +520,8 @@ class App extends React.Component {
       },
       {
         id :'room3Bookcase',
-        offsetX: 592,
-        offsetY: 370,
+        offsetX: 852,
+        offsetY: 550,
         // Size of the node
         width: 63,
         height: 25,
@@ -510,8 +530,8 @@ class App extends React.Component {
       },
       {
         id :'room3WorkTable',
-        offsetX: 600,
-        offsetY: 435,
+        offsetX: 860,
+        offsetY: 615,
         // Size of the node
         width: 41,
         height: 30,
@@ -520,8 +540,8 @@ class App extends React.Component {
       },
       {
         id :'room3Laptop',
-        offsetX: 600,
-        offsetY: 435,
+        offsetX: 860,
+        offsetY: 615,
         // Size of the node
         width: 30,
         height: 17,
@@ -530,8 +550,8 @@ class App extends React.Component {
       },
       {
         id :'room3Chair',
-        offsetX: 635,
-        offsetY: 435,
+        offsetX: 895,
+        offsetY: 615,
         // Size of the node
         width: 28,
         height: 32,
@@ -540,8 +560,8 @@ class App extends React.Component {
       },
       {
         id :'room3Lamp',
-        offsetX: 842,
-        offsetY: 325,
+        offsetX: 1102,
+        offsetY: 505,
         // Size of the node
         width: 20,
         height: 20,
@@ -549,8 +569,8 @@ class App extends React.Component {
       },
       {
         id :'room3Warddrobe',
-        offsetX: 740,
-        offsetY: 304,
+        offsetX: 1000,
+        offsetY: 484,
         // Size of the node
         width: 73,
         height: 35,
@@ -558,8 +578,8 @@ class App extends React.Component {
       },
       {
         id :'room3ToiletDoor',
-        offsetX: 843,
-        offsetY: 266,
+        offsetX: 1103,
+        offsetY: 446,
         // Size of the node
         width: 27,
         height: 30,
@@ -568,8 +588,8 @@ class App extends React.Component {
       },
       {
         id :'toilet3BathTub',
-        offsetX: 780,
-        offsetY: 245,
+        offsetX: 1040,
+        offsetY: 425,
         // Size of the node
         width: 50,
         height: 25,
@@ -578,8 +598,8 @@ class App extends React.Component {
       },
       {
         id :'toilet3Basin',
-        offsetX: 842,
-        offsetY: 196,
+        offsetX: 1102,
+        offsetY: 376,
         // Size of the node
         width: 30,
         height: 25,
@@ -588,8 +608,8 @@ class App extends React.Component {
       },
       {
         id :'toilet3Faucet',
-        offsetX: 790,
-        offsetY: 172,
+        offsetX: 1050,
+        offsetY: 352,
         // Size of the node
         width: 23,
         height: 36,
@@ -597,8 +617,8 @@ class App extends React.Component {
       },
       {
         id :'gasBurner',
-        offsetX:725,
-        offsetY:34,
+        offsetX: 985,
+        offsetY: 214,
         // Size of the node
         width: 100,
         height: 32,
@@ -606,8 +626,8 @@ class App extends React.Component {
       },
       {
         id :'kitchenSink',
-        offsetX:542,
-        offsetY:36,
+        offsetX: 802,
+        offsetY: 216,
         // Size of the node
         width: 76,
         height: 38,
@@ -615,8 +635,8 @@ class App extends React.Component {
       },
       {
         id :'refrigerator',
-        offsetX:692,
-        offsetY:115,
+        offsetX: 952,
+        offsetY: 295,
         // Size of the node
         width: 52,
         height:59,
@@ -624,8 +644,8 @@ class App extends React.Component {
       },
       {
         id :'waterCooler',
-        offsetX:524,
-        offsetY:107,
+        offsetX: 784,
+        offsetY: 287,
         // Size of the node
         width: 39,
         height:38,
@@ -633,8 +653,8 @@ class App extends React.Component {
       },
       {
         id :'washBasin',
-        offsetX:260,
-        offsetY:176,
+        offsetX: 520,
+        offsetY: 356,
         // Size of the node
         width: 41,
         height:30,
@@ -643,8 +663,8 @@ class App extends React.Component {
       },
       {
         id :'staircase1',
-        offsetX:517,
-        offsetY:427,
+        offsetX: 777,
+        offsetY: 607,
         // Size of the node
         width:87,
         height:25,
@@ -652,8 +672,8 @@ class App extends React.Component {
       },
       {
         id :'staircase2',
-        offsetX:550,
-        offsetY:470,
+        offsetX: 810,
+        offsetY: 650,
         // Size of the node
         width:61,
         height:22,
@@ -662,8 +682,8 @@ class App extends React.Component {
       },
       {
         id :'staircase3',
-        offsetX:517,
-        offsetY:514,
+        offsetX: 777,
+        offsetY: 694,
         // Size of the node
         width:87,
         height:25,
@@ -671,8 +691,8 @@ class App extends React.Component {
       },
       {
         id :'balconyChair1',
-        offsetX:308,
-        offsetY:83,
+        offsetX: 568,
+        offsetY: 263,
         // Size of the node
         width: 40,
         height:44,
@@ -681,8 +701,8 @@ class App extends React.Component {
       },
       {
         id :'balconyChair2',
-        offsetX:425,
-        offsetY:83,
+        offsetX: 685,
+        offsetY: 263,
         // Size of the node
         width:40,
         height:44,
@@ -691,8 +711,8 @@ class App extends React.Component {
       },
       {
         id :'stool',
-        offsetX:366,
-        offsetY:83,
+        offsetX: 626,
+        offsetY: 263,
         // Size of the node
         width: 35,
         height:35,
@@ -702,8 +722,8 @@ class App extends React.Component {
     //   
       {
         id :'balconyStool1',
-        offsetX:278,
-        offsetY:45,
+        offsetX: 538,
+        offsetY: 225,
         // Size of the node
         width: 30,
         height:30,
@@ -711,8 +731,8 @@ class App extends React.Component {
       },
       {
         id :'balconyStool2',
-        offsetX:462,
-        offsetY:45,
+        offsetX: 722,
+        offsetY: 225,
         // Size of the node
         width: 30,
         height:30,
@@ -721,8 +741,8 @@ class App extends React.Component {
       },
       {
         id :'balconyPlant1',
-        offsetX:278,
-        offsetY:45,
+        offsetX: 538,
+        offsetY: 225,
         // Size of the node
         width: 25,
         height:25,
@@ -730,8 +750,8 @@ class App extends React.Component {
       },
       {
         id :'balconyPlant2',
-        offsetX:462,
-        offsetY:45,
+        offsetX: 722,
+        offsetY: 225,
         // Size of the node
         width: 25,
         height:25,
@@ -739,8 +759,8 @@ class App extends React.Component {
       },
       {
         id :'commonDoor',
-        offsetX: 673,
-        offsetY:264,
+        offsetX: 933,
+        offsetY: 444,
         // Size of the node
         width: 27,
         height: 30,
@@ -749,8 +769,8 @@ class App extends React.Component {
       },
       {
         id :'toilet4BathTub',
-        offsetX: 680,
-        offsetY: 200,
+        offsetX: 940,
+        offsetY: 380,
         // Size of the node
         width: 50,
         height: 25,
@@ -759,8 +779,8 @@ class App extends React.Component {
       },
       {
         id :'toilet4Basin',
-        offsetX: 729,
-        offsetY: 262,
+        offsetX: 989,
+        offsetY: 442,
         // Size of the node
         width: 30,
         height: 25,
@@ -769,8 +789,8 @@ class App extends React.Component {
       },
       {
         id :'toilet4Faucet',
-        offsetX: 729,
-        offsetY: 172,
+        offsetX: 989,
+        offsetY: 352,
         // Size of the node
         width: 23,
         height: 37,
@@ -778,8 +798,8 @@ class App extends React.Component {
       },
       {
         id :'storeRoomDoor',
-        offsetX: 798,
-        offsetY: 122,
+        offsetX: 1058,
+        offsetY: 302,
         // Size of the node
         width: 51,
         height: 38,
@@ -788,8 +808,8 @@ class App extends React.Component {
       },
       {
         id :'storeRoomWarddrobe',
-        offsetX: 820,
-        offsetY: 34,
+        offsetX: 1080,
+        offsetY: 214,
         // Size of the node
         width: 73,
         height: 35,
@@ -797,8 +817,8 @@ class App extends React.Component {
       },
       {
         id :'windowGarden',
-        offsetX:370,
-        offsetY:26,
+        offsetX: 630,
+        offsetY: 206,
         // Size of the node
         width: 253,
         height:36,
@@ -806,49 +826,49 @@ class App extends React.Component {
       },
       {
         id :'TextNode1',
-        offsetX:120,
-        offsetY:40,
+        offsetX: 380,
+        offsetY: 220,
         // Size of the node
         width: 80,
         height:37,
        
-        shape: { type: 'Text', content: 'Bedroom 12 x 12' },
+        shape: { type: 'Text', content: 'Bed Room 12 x 12' },
         style: { fontSize: 16  }
       },
       {
         id :'TextNode2',
-        offsetX:94,
-        offsetY:224,
+        offsetX: 354,
+        offsetY: 404,
         // Size of the node
-        width: 38,
-        height:23,
+        width: 40,
+        height:40,
         shape: { type: 'Text', content: ' Toilet 6 x 4' },
         style: { fontSize: 16  }
       },
       {
         id :'TextNode3',
-        offsetX:91,
-        offsetY:300,
+        offsetX: 351,
+        offsetY: 480,
         // Size of the node
-        width: 38,
-        height:23,
+        width: 40,
+        height:40,
         shape: { type: 'Text', content: ' Toilet 6 x 4' },
         style: { fontSize: 16  }
       },
       {
         id :'TextNode4',
-        offsetX:118,
-        offsetY:452,
+        offsetX: 378,
+        offsetY: 632,
         // Size of the node
         width: 80,
         height:37,
-        shape: { type: 'Text', content:' Bedroom 12 x 12'},
+        shape: { type: 'Text', content:' Bed Room 12 x 12'},
         style: { fontSize: 16  }
       },
       {
         id :'TextNode5',
-        offsetX:331,
-        offsetY:481,
+        offsetX: 591,
+        offsetY: 661,
         // Size of the node
         width: 102,
         height:37,
@@ -857,8 +877,8 @@ class App extends React.Component {
       },
       {
         id :'TextNode6',
-        offsetX:602,
-        offsetY:107,
+        offsetX: 862,
+        offsetY: 287,
         // Size of the node
         width: 80,
         height:37,
@@ -867,48 +887,48 @@ class App extends React.Component {
       },
       {
         id :'TextNode7',
-        offsetX:820,
-        offsetY:80,
+        offsetX: 1080,
+        offsetY: 258,
         // Size of the node
-        width: 50,
+        width: 80,
         height:36,
-        shape: { type: 'Text', content: 'Storeroom 6 x 9' },
-        style: { fontSize: 16  }
+        shape: { type: 'Text', content: 'Store Room 6 x 9' },
+        style: { fontSize: 13  }
       },
       {
         id :'TextNode8',
-        offsetX:725,
-        offsetY:214,
+        offsetX: 985,
+        offsetY: 394,
         // Size of the node
-        width: 38,
-        height:23,
+        width: 40,
+        height:40,
         shape: { type: 'Text', content: 'Toilet 7 x 9' },
         style: { fontSize: 16  }
       },
       {
         id :'TextNode9',
-        offsetX:820,
-        offsetY:232,
+        offsetX: 1080,
+        offsetY: 412,
         // Size of the node
-        width: 38,
-        height:23,
+        width: 40,
+        height:40,
         shape: { type: 'Text', content: 'Toilet 7 x 9' },
         style: { fontSize: 16  }
       },
       {
         id :'TextNode10',
-        offsetX:680,
-        offsetY:370,
+        offsetX: 940,
+        offsetY: 550,
         // Size of the node
         width: 80,
         height:37,
-        shape: { type: 'Text', content: 'Bedroom 18 x 15' },
+        shape: { type: 'Text', content: 'Bed Room 18 x 15' },
         style: { fontSize: 16  }
       },
       {
         id :'TextNode11',
-        offsetX:331,
-        offsetY:277,
+        offsetX: 591,
+        offsetY: 457,
         // Size of the node
         width: 100,
         height:47,
@@ -923,12 +943,12 @@ class App extends React.Component {
         strokeWidth: 5
       },
         sourcePoint: {
-            x: 20,
-            y: 10
+            x: 280,
+            y: 190
         },
         targetPoint: {
-            x: 80,
-            y: 10
+            x: 340,
+            y: 190
         },
         targetDecorator: {
           shape: 'none',
@@ -940,12 +960,12 @@ class App extends React.Component {
         strokeWidth: 5
       },
         sourcePoint: {
-            x: 160,
-            y: 10
+            x: 420,
+            y: 190
         },
         targetPoint: {
-            x: 240,
-            y: 10
+            x: 500,
+            y: 190
         },
         targetDecorator: {
           shape: 'none',
@@ -957,12 +977,12 @@ class App extends React.Component {
         strokeWidth: 5
       },
         sourcePoint: {
-            x: 20,
-            y: 10
+            x: 280,
+            y: 190
         },
         targetPoint: {
-            x: 20,
-            y: 80
+            x: 280,
+            y: 260
         },
         targetDecorator: {
           shape: 'none',
@@ -974,12 +994,12 @@ class App extends React.Component {
         strokeWidth: 5
       },
         sourcePoint: {
-            x: 240,
-            y: 10
+            x: 500,
+            y: 190
         },
         targetPoint: {
-          x: 240,
-          y: 200
+          x: 500,
+          y: 380
         },
         targetDecorator: {
           shape: 'none',
@@ -991,12 +1011,12 @@ class App extends React.Component {
         strokeWidth: 4
       },
         sourcePoint: {
-            x: 20,
-            y: 200
+            x: 280,
+            y: 380
         },
         targetPoint: {
-            x: 155,
-            y: 200
+            x: 415,
+            y: 380
         },
         targetDecorator: {
           shape: 'none',
@@ -1009,12 +1029,12 @@ class App extends React.Component {
         strokeWidth: 4
       },
         sourcePoint: {
-            x: 185,
-            y: 280
+            x: 445,
+            y: 460
         },
         targetPoint: {
-            x: 185,
-            y: 350
+            x: 445,
+            y: 530
         },
         targetDecorator: {
           shape: 'none',
@@ -1026,12 +1046,12 @@ class App extends React.Component {
         strokeWidth: 4
       },
         sourcePoint: {
-            x: 20,
-            y: 350
+            x: 280,
+            y: 530
         },
         targetPoint: {
-            x: 155,
-            y: 350
+            x: 415,
+            y: 530
         },
         targetDecorator: {
           shape: 'none',
@@ -1043,12 +1063,12 @@ class App extends React.Component {
         strokeWidth: 4
       },
         sourcePoint: {
-            x: 185,
-            y: 200
+            x: 445,
+            y: 380
         },
         targetPoint: {
-            x: 185,
-            y: 280
+            x: 445,
+            y: 460
         },
         targetDecorator: {
           shape: 'none',
@@ -1060,12 +1080,12 @@ class App extends React.Component {
         strokeWidth: 4
       },
         sourcePoint: {
-            x: 100,
-            y: 280
+            x: 360,
+            y: 460
         },
         targetPoint: {
-            x: 185,
-            y: 280
+            x: 445,
+            y: 460
         },
         targetDecorator: {
           shape: 'none',
@@ -1077,12 +1097,12 @@ class App extends React.Component {
         strokeWidth: 4
       },
         sourcePoint: {
-            x: 20,
-            y: 200
+            x: 280,
+            y: 380
         },
         targetPoint: {
-            x: 20,
-            y: 280
+            x: 280,
+            y: 460
         },
         targetDecorator: {
           shape: 'none',
@@ -1094,12 +1114,12 @@ class App extends React.Component {
         strokeWidth: 4
       },
         sourcePoint: {
-            x: 20,
-            y: 280
+            x: 280,
+            y: 460
         },
         targetPoint: {
-            x:185,
-            y: 280
+            x: 445,
+            y: 460
         },
         targetDecorator: {
           shape: 'none',
@@ -1111,12 +1131,12 @@ class App extends React.Component {
         strokeWidth: 4
       },
         sourcePoint: {
-            x: 20,
-            y: 280
+            x: 280,
+            y: 460
         },
         targetPoint: {
-            x: 20,
-            y: 370
+            x: 280,
+            y: 550
         },
         targetDecorator: {
           shape: 'none',
@@ -1128,12 +1148,12 @@ class App extends React.Component {
         strokeWidth: 4
       },
         sourcePoint: {
-          x: 20,
-          y: 420
+          x: 280,
+          y: 600
         },
         targetPoint: {
-            x: 20,
-            y: 480
+            x: 280,
+            y: 660
         },
         targetDecorator: {
           shape: 'none',
@@ -1145,12 +1165,12 @@ class App extends React.Component {
         strokeWidth: 4
       },
         sourcePoint: {
-            x: 20,
-            y: 480
+            x: 280,
+            y: 660
         },
         targetPoint: {
-            x: 80,
-            y: 480
+            x: 340,
+            y: 660
         },
         targetDecorator: {
           shape: 'none',
@@ -1162,12 +1182,12 @@ class App extends React.Component {
         strokeWidth: 4
       },
         sourcePoint: {
-            x: 160,
-            y: 480
+            x: 420,
+            y: 660
         },
         targetPoint: {
-            x: 240,
-            y: 480
+            x: 500,
+            y: 660
         },
         targetDecorator: {
           shape: 'none',
@@ -1179,12 +1199,12 @@ class App extends React.Component {
         strokeWidth: 4
       },
         sourcePoint: {
-            x: 240,
-            y: 280
+            x: 500,
+            y: 460
         },
         targetPoint: {
-            x: 240,
-            y: 540
+            x: 500,
+            y: 720
         },
         targetDecorator: {
           shape: 'none',
@@ -1196,12 +1216,12 @@ class App extends React.Component {
         strokeWidth: 4
       },
         sourcePoint: {
-            x: 240,
-            y: 400
+            x: 500,
+            y: 580
         },
         targetPoint: {
-            x: 280,
-            y: 400
+            x: 540,
+            y: 580
         },
         targetDecorator: {
           shape: 'none',
@@ -1213,12 +1233,12 @@ class App extends React.Component {
         strokeWidth: 4
       },
         sourcePoint: {
-            x: 360,
-            y: 400
+            x: 620,
+            y: 580
         },
         targetPoint: {
-            x: 440,
-            y: 400
+            x: 700,
+            y: 580
         },
         targetDecorator: {
           shape: 'none',
@@ -1230,12 +1250,12 @@ class App extends React.Component {
         strokeWidth: 4
       },
         sourcePoint: {
-            x: 540,
-            y: 400
+            x: 800,
+            y: 580
         },
         targetPoint: {
-            x: 580,
-            y: 400
+            x: 840,
+            y: 580
         },
         targetDecorator: {
           shape: 'none',
@@ -1247,12 +1267,12 @@ class App extends React.Component {
         strokeWidth: 4
       },
         sourcePoint: {
-            x: 580,
-            y: 540
+            x: 840,
+            y: 720
         },
         targetPoint: {
-            x: 580,
-            y: 280
+            x: 840,
+            y: 460
         },
         targetDecorator: {
           shape: 'none',
@@ -1264,12 +1284,12 @@ class App extends React.Component {
         strokeWidth: 4
       },
         sourcePoint: {
-            x: 500,
-            y: 10
+            x: 760,
+            y: 190
         },
         targetPoint: {
-            x: 860,
-            y: 10
+            x: 1120,
+            y: 190
         },
         targetDecorator: {
           shape: 'none',
@@ -1281,12 +1301,12 @@ class App extends React.Component {
         strokeWidth: 4
       },
         sourcePoint: {
-            x: 500,
-            y: 10
+            x: 760,
+            y: 190
         },
         targetPoint: {
-            x: 500,
-            y: 140
+            x: 760,
+            y: 320
         },
         targetDecorator: {
           shape: 'none',
@@ -1298,12 +1318,12 @@ class App extends React.Component {
         strokeWidth: 4
       },
         sourcePoint: {
-            x: 580,
-            y:480
+            x: 840,
+            y: 660
         },
         targetPoint: {
-            x: 700,
-            y: 480
+            x: 960,
+            y: 660
         },
         targetDecorator: {
           shape: 'none',
@@ -1315,12 +1335,12 @@ class App extends React.Component {
         strokeWidth: 4
       },
         sourcePoint: {
-            x: 780,
-            y:480
+            x: 1040,
+            y: 660
         },
         targetPoint: {
-            x: 860,
-            y: 480
+            x: 1120,
+            y: 660
         },
         targetDecorator: {
           shape: 'none',
@@ -1332,12 +1352,12 @@ class App extends React.Component {
         strokeWidth: 4
       },
         sourcePoint: {
-            x: 860,
-            y:480
+            x: 1120,
+            y: 660
         },
         targetPoint: {
-            x: 860,
-            y: 10
+            x: 1120,
+            y: 190
         },
         targetDecorator: {
           shape: 'none',
@@ -1349,12 +1369,12 @@ class App extends React.Component {
         strokeWidth: 4
       },
         sourcePoint: {
-            x: 780,
-            y:10
+            x: 1040,
+            y: 190
         },
         targetPoint: {
-            x: 780,
-            y: 100
+            x: 1040,
+            y: 280
         },
         targetDecorator: {
           shape: 'none',
@@ -1366,12 +1386,12 @@ class App extends React.Component {
         strokeWidth: 4
       },
         sourcePoint: {
-            x: 630,
-            y:280
+            x: 890,
+            y: 460
         },
         targetPoint: {
-            x: 830,
-            y: 280
+            x: 1090,
+            y: 460
         },
         targetDecorator: {
           shape: 'none',
@@ -1383,12 +1403,12 @@ class App extends React.Component {
         strokeWidth: 4
       },
         sourcePoint: {
-            x: 660,
-            y:150
+            x: 920,
+            y: 330
         },
         targetPoint: {
-            x: 860,
-            y: 150
+            x: 1120,
+            y: 330
         },
         targetDecorator: {
           shape: 'none',
@@ -1400,12 +1420,12 @@ class App extends React.Component {
         strokeWidth: 4
       },
         sourcePoint: {
-            x: 760,
-            y:150
+            x: 1020,
+            y: 330
         },
         targetPoint: {
-            x: 760,
-            y: 280
+            x: 1020,
+            y: 460
         },
         targetDecorator: {
           shape: 'none',
@@ -1418,12 +1438,12 @@ class App extends React.Component {
         strokeWidth: 4
       },
         sourcePoint: {
-            x: 240,
-            y:540
+            x: 500,
+            y: 720
         },
         targetPoint: {
-            x: 580,
-            y: 540
+            x: 840,
+            y: 720
         },
         targetDecorator: {
           shape: 'none',
@@ -1435,12 +1455,12 @@ class App extends React.Component {
         strokeWidth: 4
       },
         sourcePoint: {
-            x: 20,
-            y:140
+            x: 280,
+            y: 320
         },
         targetPoint: {
-            x: 20,
-            y: 200
+            x: 280,
+            y: 380
         },
         targetDecorator: {
           shape: 'none',
@@ -1452,12 +1472,12 @@ class App extends React.Component {
         strokeWidth: 4
       },
         sourcePoint: {
-            x: 660,
-            y:150
+            x: 920,
+            y: 330
         },
         targetPoint: {
-            x: 660,
-            y: 250
+            x: 920,
+            y: 430
         },
         targetDecorator: {
           shape: 'none',
@@ -1468,8 +1488,74 @@ class App extends React.Component {
       showRulers: true,
     }
     this.scrollSettings = {
-      canAutoScroll: false, scrollLimit: 'Infinity', minZoom: 0.25, maxZoom: 30 
+      canAutoScroll: false, scrollLimit: 'Diagram', minZoom: 0.25, maxZoom: 30,
+      padding: {left: 50, right: 50, top: 50, bottom: 50}
     };
+    this.snapSettings = {
+      constraints: SnapConstraints.All & ~SnapConstraints.SnapToLines
+    }
+    this.menuItems = [
+      {
+        text: 'File',
+        items: [
+          { text: 'New', iconCss: 'sf-icon-new' },
+          { text: 'Open', iconCss: 'sf-icon-open' },
+          { text: 'Save', iconCss: 'sf-icon-save' },
+          { text: 'Export', iconCss: 'sf-icon-export'},
+          { text: 'Print', iconCss: 'sf-icon-print' },
+        ]
+    },
+    {
+        text: 'Edit',
+        items: [
+          { text: 'Undo', iconCss: 'sf-icon-undo' },
+          { text: 'Redo', iconCss: 'sf-icon-redo' },
+          { separator: true },
+          { text: 'Copy', iconCss: 'sf-icon-copy' },
+          { text: 'Cut', iconCss: 'sf-icon-cut' },
+          { text: 'Paste', iconCss: 'sf-icon-paste' },
+          { separator: true },
+          { text: 'Delete', iconCss: 'sf-icon-delete' }
+        ]
+    },
+    {
+        text: 'Insert',
+        items:[
+            { text: 'Insert Image', tooltipText: 'Insert Image', iconCss: 'sf-icon-insert_image' },
+            { text: 'Insert Link', tooltipText: 'Insert link', iconCss: 'sf-icon-insert_link' },
+        ]
+    },
+    // {
+    //   text: 'Design',
+    //   items: [
+    //       { text: 'Orientation', items: [{ text: 'Landscape', iconCss: 'sf-icon-check-tick' }, { text: 'Portrait' }] },
+    //       {
+    //           text: 'Page Size', items: [
+    //               { text: 'Letter (216 mm x 280 mm)', value: 'Letter', iconCss: 'sf-icon-check-tick' },
+    //               { text: 'Legal (216 mm x 356 mm)', value: 'Legal' },
+    //               { text: 'Tabloid (279 mm x 432 mm)', value: 'Tabloid' },
+    //               { text: 'A3 (297 mm x 420 mm)', value: 'A3' },
+    //               { text: 'A4 (210 mm x 297 mm)', value: 'A4' },
+    //               { text: 'A5 (148 mm x 210 mm)', value: 'A5' },
+    //               { text: 'A6 (105 mm x 148 mm)', value: 'A6' },
+    //           ]
+    //       },
+    //   ]
+    // },
+    {
+      text: 'View',
+      items: [
+          { text: 'Show Rulers', iconCss: 'sf-icon-check-tick' },
+          { text: 'Show Grid', iconCss: 'sf-icon-check-tick' },
+          { text: 'Snap To Grid', iconCss: '' },
+          { text: 'Show Guides', iconCss: 'sf-icon-check-tick' },
+          // { text: 'Page Break' },
+          // { text: 'Multiple Page' },
+          { separator: true },
+          { text: 'Fit To Screen' },
+      ]
+    }
+    ];
     this.extensionType = '.csv';
     this.selectedItem = new SelectorViewModel();
     this.dropDownDataSources = new DropDownDataSources();
@@ -1565,85 +1651,26 @@ render() {
                 />
                 <span id="diagramreport" className="db-diagram-name db-save-text"></span>
               </div>
-              <div className="db-menu-container" style={{display: 'flex', justifyContent: 'space-between'}}>
-                <div>
-                  <div className="db-menu-style">
-                    <DropDownButtonComponent
-                      id="btnFileMenu"
-                      cssClass="db-dropdown-menu"
-                      items={this.dropDownDataSources.fileMenuItems}
-                      select={menuclick}
-                      beforeOpen={beforeOpen}
-                      beforeClose={beforeClose}
-                      beforeItemRender={beforItem}
-                    >
-                      File
-                    </DropDownButtonComponent>
-                  </div>
-                  <div className="db-menu-style">
-                    <DropDownButtonComponent
-                      id="btnEditMenu"
-                      cssClass="db-dropdown-menu"
-                      items={this.dropDownDataSources.editMenuItems}
-                      select={menuclick}
-                      beforeOpen={beforeOpen}
-                      beforeClose={beforeClose}
-                      beforeItemRender={beforItem}
-                    >
-                      Edit
-                    </DropDownButtonComponent>
-                  </div>
-                  <div className="db-menu-style">
-                    <DropDownButtonComponent
-                      id="btnInsertMenu"
-                      cssClass="db-dropdown-menu"
-                      items={this.dropDownDataSources.insertMenuItems}
-                      select={menuclick1}
-                      beforeOpen={beforeOpen}
-                      beforeClose={beforeClose}
-                      beforeItemRender={beforItem}
-                    >
-                      Insert
-                    </DropDownButtonComponent>
-                  </div>
-                  <div className="db-menu-style">
-                    <DropDownButtonComponent
-                      id="btnDesignMenu"
-                      cssClass="db-dropdown-menu"
-                      target='.e-contextmenu-wrapper.designMenu'
-                      items={this.dropDownDataSources.arrangeMenuItems}
-                      select={menuclick}
-                      beforeOpen={beforeOpen}
-                      beforeClose={beforeClose}
-                      beforeItemRender={beforItem}
-                      
-                    >
-                      Design
-                    </DropDownButtonComponent>
-                  </div>
-                  <div className="db-menu-style">
-                    <DropDownButtonComponent
-                      id="btnViewMenu"
-                      cssClass="db-dropdown-menu"
-                      items={this.dropDownDataSources.viewMenuItems}
-                      select={menuclick}
-                      beforeOpen={beforeOpen}
-                      beforeClose={beforeClose}
-                      beforeItemRender={beforItem}
-                    >
-                      View
-                    </DropDownButtonComponent>
-                  </div>
-                </div>
-                <div className="promotion-text"><img style={{marginRight:'7px', filter: 'brightness(0) invert(1)'}} src="/assets/dbstyle/common_images/Syncfusion_Logo.svg" />Powered by&nbsp;<a className="free-tools-sample-explore-btn" style={{textDecoration: 'none', color:'#fff30f'}} href="https://www.syncfusion.com/react-components/react-diagram?tag=es-freetools-floor-planner-sample-ft" target="_blank">Syncfusion Diagram Component</a></div>
+              <div className="diagram-menu-control">
+                    <div className='menu-control' style={{display: 'flex', justifyContent: 'space-between'}}> 
+                      <MenuComponent 
+                        id="diagram-menu"
+                        items={this.menuItems}
+                        select={menuclick}
+                        beforeOpen={beforeOpen}
+                        beforeClose={beforeClose}
+                        beforeItemRender={beforItem}
+                      ></MenuComponent>
+                      <div className="promotion-text"><img style={{marginRight:'7px', filter: 'brightness(0) invert(1)'}} src="./assets/dbstyle/common_images/Syncfusion_Logo.svg" />Powered by&nbsp;<a className="free-tools-sample-explore-btn" style={{textDecoration: 'none', color:'#fff30f'}} href="https://www.syncfusion.com/react-components/react-diagram?tag=es-freetools-floor-planner-sample-ft" target="_blank">Syncfusion Diagram Component</a></div>
+                    </div>
               </div>
             </div>
             <div className='db-toolbar-editor'>
               <div className='db-toolbar-container'>
                 <ToolbarComponent id="toolbarEditor" overflowMode="Scrollable" clicked={tooledit}>
                   <ItemsDirective>
-                    <ItemDirective prefixIcon='sf-icon-undo tb-icons' tooltipText='Undo' cssClass='tb-item-start tb-item-undo' />
-                    <ItemDirective prefixIcon='sf-icon-redo tb-icons' tooltipText='Redo' cssClass='tb-item-end tb-item-redo' />
+                    <ItemDirective prefixIcon='sf-icon-undo tb-icons' disabled = {true} tooltipText='Undo' cssClass='tb-item-start tb-item-undo' />
+                    <ItemDirective prefixIcon='sf-icon-redo tb-icons' disabled = {true} tooltipText='Redo' cssClass='tb-item-end tb-item-redo' />
                     <ItemDirective type="Separator" />
                     <ItemDirective prefixIcon='sf-icon-pan' tooltipText='Pan Tool' cssClass='tb-item-start pan-item' />
                     <ItemDirective prefixIcon='sf-icon-pointer' tooltipText='Select Tool' cssClass='tb-item-middle tb-item-selected' />
@@ -1659,7 +1686,6 @@ render() {
                     <ItemDirective prefixIcon='sf-icon-align_bottom' tooltipText='Align Bottom' visible={false} align='Center' cssClass='tb-item-middle tb-item-align-category' />
                     <ItemDirective prefixIcon='sf-icon-distribute_horizontal' tooltipText='Distribute Objects Horizontally' visible={false} align='Center' cssClass='tb-item-middle tb-item-space-category' />
                     <ItemDirective prefixIcon='sf-icon-distribute_vertical' tooltipText='Distribute Objects Vertically' visible={false} align='Center' cssClass='tb-item-middle tb-item-space-category' />
-                    <ItemDirective type="Separator" visible={false} align='Center' />
                     <ItemDirective prefixIcon='sf-icon-bring-forward' tooltipText='Bring Forward' visible={false} align='Center' cssClass='tb-item-start tb-item-lock-category' />
                     <ItemDirective prefixIcon='sf-icon-bring-to-front' tooltipText='Bring To Front' visible={false} align='Center' cssClass='tb-item-middle tb-item-lock-category' />
                     <ItemDirective prefixIcon='sf-icon-send-backward' tooltipText='Send Backward' visible={false} align='Center' cssClass='tb-item-middle tb-item-lock-category' />
@@ -1688,6 +1714,8 @@ render() {
                   ref={palette => this.palette = palette}
                   width="100%"
                   height="100%"
+                  symbolWidth={50}
+                  symbolHeight={50}
                   palettes={this.palettes.palettes}
                   getSymbolInfo={this.palettes.getSymbolInfo}
                   symbolMargin={this.palettes.symbolMargin}
@@ -1704,14 +1732,16 @@ render() {
                     ref={diagram => this.diagram = diagram}
                     width={"100%"}
                     height={"100%"}
-                    pageSettings={this.pageSettings}
+                    // pageSettings={this.pageSettings}
                     scrollSettings={this.scrollSettings}
+                    snapSettings={this.snapSettings}
                     rulerSettings={this.rulerSettings}
                     nodes={this.nodes}
                     connectors={this.connectors}
                     getNodeDefaults={this.setNodeDefaults}
                     getConnectorDefaults={this.setConnectorDefaults}
                     created={this.created.bind(this)}
+                    commandManager={{commands:this.getCommands()}}
                     selectionChange={this.diagramEvents.selectionChange.bind(this.diagramEvents)}
                     positionChange={this.diagramEvents.nodePositionChange.bind(this.diagramEvents)}
                     sizeChange={this.diagramEvents.nodeSizeChange.bind(this.diagramEvents)}
@@ -1720,6 +1750,9 @@ render() {
                     historyChange={this.diagramEvents.historyChange.bind(this.diagramEvents)}
                     scrollChange={this.scrollChange.bind(this)}
                     collectionChange={this.diagramEvents.collectionChange.bind(this.diagramEvents)}
+                    contextMenuClick={this.contextMenuClick.bind(this)}
+                    contextMenuOpen={this.contextMenuOpen.bind(this)}
+                    contextMenuSettings={{ show: true, items: [{ text: 'Paste', id: 'pasteObj', target: '.e-elementcontent', iconCss: 'e-icons e-paste',}]}}
                   />
                 </div>
               </div>
@@ -1727,12 +1760,33 @@ render() {
                 <div id='generalDiagramContainer' className='db-general-diagram-prop-container'>
                   <div id='diagramPropertyContainer' className='db-diagram-prop-container'>
                     <div className='row db-prop-header-text'>
-                      Page Settings
-                      <ButtonComponent className='close' onClick={propertyPanel}>
+                      Diagram
+                      <ButtonComponent className='close' onClick={propertyPanel} style={{ opacity:1 }}>
                         <i style={{ width: '20px', height: '20px', fontSize: '20px' }} className='sf-icon-close'></i>
                       </ButtonComponent>
                     </div>
-                    <div className='db-prop-separator' style={{ backgroundColor: '#b5b5b5', marginBottom: '10px' }}></div>
+                    
+                    <div className='col-xs-6 db-col-left' style={{ marginTop: '10px' }}>
+                      <CheckBoxComponent id="showRulers" label="Show Rulers" ref={showRulers => this.showRulers = showRulers}
+                        checked={true}
+                        change={this.diagramPropertyBinding.diagramPropertiesChange.bind(this)} />
+                    </div>
+                    <div className='col-xs-6 db-col-right' style={{ marginTop: '10px' }}>
+                      <CheckBoxComponent id="showGrid" label="Show Grid" ref={showGrid => this.showGrid = showGrid}
+                        checked={true}
+                        change={this.diagramPropertyBinding.diagramPropertiesChange.bind(this)} />
+                    </div>
+                    <div className='col-xs-6 db-col-left' style={{ marginTop: '10px' }}>
+                      <CheckBoxComponent id="snapToGrid" label="Snap To Grid" ref={snapToGrid => this.snapToGrid = snapToGrid}
+                        checked={false}
+                        change={this.diagramPropertyBinding.diagramPropertiesChange.bind(this)} />
+                    </div>
+                    <div className='col-xs-6 db-col-right' style={{ marginTop: '10px' }}>
+                      <CheckBoxComponent id="showGuides" label="Show Guides" ref={showGuides => this.showGuides = showGuides}
+                        checked={true}
+                        change={this.diagramPropertyBinding.diagramPropertiesChange.bind(this)} />
+                    </div>
+                    {/* <div className='db-prop-separator' style={{ backgroundColor: '#b5b5b5', marginBottom: '10px' }}></div>
                     <div className='row db-prop-row'>
                       <div className='col-xs-12 db-col-left'>
                         <span className='db-prop-text-style'>Format</span>
@@ -1823,13 +1877,13 @@ render() {
                       <CheckBoxComponent id="showPageBreaks" label="Page Breaks"    ref={showPageBreaks => this.showPageBreaks = showPageBreaks}
                         checked={this.selectedItem.pageSettings.pageBreaks}
                         change={this.diagramPropertyBinding.pageBreaksChange.bind(this.diagramPropertyBinding)} />
-                    </div>
+                    </div> */}
                   </div>
                   <div id='nodePropertyContainer' className='db-node-prop-container' style={{ display: 'none' }}>
                     <div className='db-node-behaviour-prop' id="dimen">
                       <div className='row db-prop-header-text'>
                         Properties
-                        <ButtonComponent className='close' onClick={propertyPanel}>
+                        <ButtonComponent className='close' onClick={propertyPanel} style={{ opacity:1 }}>
                           <i style={{ width: '20px', height: '20px', fontSize: '20px' }} className='sf-icon-close'></i>
                         </ButtonComponent>
                       </div>
@@ -1883,6 +1937,7 @@ render() {
                               <NumericTextBoxComponent
                                 style={{ width: '72px' }}
                                 id="nodeWidth"
+                                min={1} 
                                 ref={width => (this.width = width)}
                                 format="n0"
                                 change={nodeWidthChange}
@@ -1899,6 +1954,7 @@ render() {
                               <NumericTextBoxComponent
                                 style={{ width: '72px' }}
                                 id="nodeHeight"
+                                min={1} 
                                 ref={height => (this.height = height)}
                                 format="n0"
                                 change={nodeHeightChange}
@@ -1906,7 +1962,7 @@ render() {
                             </div>
                           </div>
                         </div>
-                        <div className='col-xs-2 db-col-left' style={{ width: '20px', paddingLeft: '7px' }}>
+                        <div className='col-xs-2 db-col-left' style={{ width: '20px', paddingLeft: '7px' }} title="Aspect Ratio" >
                           <ButtonComponent
                             style={{ height: '26px', backgroundColor: '#ffff' }}
                             id='aspectRatioBtn'
@@ -1932,6 +1988,7 @@ render() {
                               <NumericTextBoxComponent
                                 style={{ width: '72px' }}
                                 id="nodeRotateAngle"
+                                min={-360} max={360}
                                 ref={rotate => (this.rotate = rotate)}
                                 format="n0"
                                 change={rotationChange}
@@ -1956,7 +2013,7 @@ render() {
                             Insert link
                           </ButtonComponent>
                         </div>
-                        <div className='col-xs-6 db-col-left'>
+                        <div className='col-xs-6 db-col-left' id="insertImageDiv">
                           <ButtonComponent
                             style={{ fontSize: '10px', marginLeft: '5px', width: '110px', paddingLeft: '3px' }}
                             id="insertimage"
@@ -1988,28 +2045,29 @@ render() {
                                 mode="Palette"
                                 showButtons={false}
                                 change={nodeFillColor}
+                                value="#ffffff"
                               />
                             </div>
                           </div>
                         </div>
                       </div>
                       <div className='row db-border-style'>
-                        <div className='row db-prop-header-text db-border-style-header'>
+                        <div className='row db-prop-header-text db-border-style-header'style={{ marginTop: '20px', marginBottom: '-10px' }}>
                           Border/Line Styles
                         </div>
                         <div className='row db-prop-row'>
-                          <div className='col-xs-6 db-col-right'>
+                          <div className='col-xs-4 db-col-right'>
                             <span className='db-prop-text-style'>Border Type</span>
                           </div>
-                          <div className='col-xs-2 db-col-left' style={{ marginLeft: '-6px' }}>
+                          <div className='col-xs-3 db-col-left' style={{ marginLeft: '5.5%' }}>
                             <span className='db-prop-text-style'>Color</span>
                           </div>
-                          <div className='col-xs-2 db-col-center' style={{ marginLeft: '6px' }}>
+                          <div className='col-xs-3 db-col-center' style={{ marginLeft: '0%' }}>
                             <span className='db-prop-text-style'>Thickness</span>
                           </div>
                         </div>
                         <div className='row'>
-                          <div className='col-xs-6 db-col-right' style={{ width: '77px', marginRight: '0px' }}>
+                          <div className='col-xs-4 db-col-left' style={{ width: '85px', marginRight: '0px' }}>
                             <DropDownListComponent
                               id="nodeBorderStyle"
                               ref={nodeBorder => this.nodeBorder = nodeBorder}
@@ -2020,10 +2078,11 @@ render() {
                               itemTemplate={this.lineItemTemplate} 
                               valueTemplate={this.lineValueTemplate}
                               change={nodeBorderChange}
+                              value=""
                             />
                           </div>
-                          <div className='col-xs-2 db-col-center'>
-                            <div className='db-color-container' style={{ width: '60px', marginLeft: '2px' }}>
+                          <div className='col-xs-3 db-col-center'>
+                            <div className='db-color-container' style={{ width: '50px', marginLeft: '0px' }}>
                               <div className='db-color-input'>
                                 <ColorPickerComponent
                                   id="nodeStrokeColor"
@@ -2032,11 +2091,12 @@ render() {
                                   mode="Palette"
                                   showButtons={false}
                                   change={strokeColorChange}
+                                  value="#000000"
                                 />
                               </div>
                             </div>
                           </div>
-                          <div className='col-xs-2 db-col-right' style={{ width: '73px', marginLeft: '32px' }}>
+                          <div className='col-xs-3 db-col-right' style={{ width: '75px', marginLeft: '1.5%'}}>
                             <div className='db-text-container'>
                               <div className='db-text-input'>
                                 <NumericTextBoxComponent
@@ -2044,9 +2104,10 @@ render() {
                                   id="nodeStrokeWidth"
                                   ref={strokeWidth => this.strokeWidth = strokeWidth}
                                   min={0.5}
-                                  max={20}
+                                  max={25}
                                   step={0.5}
                                   change={strokeWidthChange}
+                                  value={1}
                                 />
                               </div>
                             </div>
@@ -2058,15 +2119,17 @@ render() {
                           </div>
                           <div className='col-xs-8 db-col-left' style={{ width: '120px', paddingRight: '10px', marginLeft: '10px' }}>
                             <SliderComponent
+                              id="nodeOpacity"
                               min={0}
                               ref={opacity => this.opacity = opacity}
                               max={100}
                               step={10}
                               type="MinRange"
                               change={opacityChange}
+                              value={this.selectedItem.nodeProperties.opacity}
                             />
                           </div>
-                          <div className='col-xs-2 db-col-right' style={{ width: '50px' }}>
+                          <div className='col-xs-2 db-col-right'>
                             <input id="nodeOpacitySliderText" type="text" value='100%' readOnly={true} className="db-readonly-input" />
                           </div>
                         </div>
@@ -2074,13 +2137,17 @@ render() {
                     </div>
                   </div>
                   <div id='connectorPropertyContainer' className='db-connector-prop-container' style={{ display: 'none' }}>
-                    <div className='row db-prop-header-text'>Connector Properties</div>
+                  <div className='row db-prop-header-text'>Connector Properties
+                    <ButtonComponent className='close' onClick={propertyPanel} style={{ opacity:1 }}>
+                      <i style={{ width: '20px', height: '20px', fontSize: '20px' }} className='sf-icon-close'></i>
+                    </ButtonComponent>
+                  </div>
                     <div className='db-prop-separator' style={{ backgroundColor: '#b5b5b5' }}></div>
                     <div className='row db-prop-row'>
                       <div className='col-xs-6 db-col-left db-prop-text-style'>
                         <span className='db-prop-text-style'>Line color</span>
                       </div>
-                      <div className='col-xs-4 db-col-right db-prop-text-style' style={{ marginLeft: '18px' }}>
+                      <div className='col-xs-4 db-col-right db-prop-text-style' style={{ marginLeft: '3px' }}>
                         <span className='db-prop-text-style'>Thickness</span>
                       </div>
                     </div>
@@ -2090,27 +2157,28 @@ render() {
                           <div className='db-color-input'>
                             <ColorPickerComponent
                               id="lineColor"
+                              style={{ width: '117px' }}
                               ref={lineColor => this.lineColor = lineColor}
                               type="color"
                               mode="Palette"
                               showButtons={false}
-                              value={this.selectedItem.connectorProperties.lineColor}
+                              value="#000000"
                               change={lineColorChange}
                             />
                           </div>
                         </div>
                       </div>
                       <div className='col-xs-6 db-col-right'>
-                        <div className='db-text-container' style={{ width: '77px', marginLeft: '20px' }}>
+                        <div className='db-text-container' style={{ width: '117px', marginLeft: '2px' }}>
                           <div className='db-text-input'>
                             <NumericTextBoxComponent
-                              style={{ width: '74px' }}
+                              style={{ width: '117px' }}
                               min={0.5}
                               max={25}
                               step={0.5}
                               id="lineWidth"
                               ref={lineWidth => this.lineWidth = lineWidth}
-                              value={this.selectedItem.connectorProperties.lineWidth}
+                              value={1}
                               change={lineWidthChange}
                             />
                           </div>
@@ -2123,7 +2191,7 @@ render() {
                       </div>
                       <div className='col-xs-8 db-col-left' style={{ width: '120px', paddingRight: '10px', marginLeft: '10px' }}>
                         <SliderComponent
-                          id='default'
+                          id='connectorOpacity'
                           ref={connectorOpacity => this.connectorOpacity = connectorOpacity} 
                           value={this.selectedItem.connectorProperties.opacity} 
                           min={0}
@@ -2175,8 +2243,14 @@ render() {
                         </div>
                       </div>
                     </div>
+                    <div className='col-xs-8 db-col-left db-prop-text-style' id="textPositionText">
+                      <span className='db-prop-text-style'> Text Position </span>
+                    </div>
+                    <div className='col-xs-4 db-col-left db-prop-text-style' id="textColorText">
+                      <span className='db-prop-text-style' > Color </span>
+                    </div>
                     <div className='row db-prop-row'>
-                      <div className='col-xs-6 db-col-left' id="textPositionDiv" style={{ width: '148px' }}>
+                      <div className='col-xs-8 db-col-left' id="textPositionDiv" >
                         <DropDownListComponent
                           id="ddlTextPosition"
                           ref={dropdown => this.ddlTextPosition = dropdown}
@@ -2184,9 +2258,10 @@ render() {
                           dataSource={this.selectedItem.textProperties.textPositionDataSource}
                           fields={this.dropdownListFields}
                           change={this.diagramPropertyBinding.textPositionChange.bind(this.diagramPropertyBinding)}
+                          value='Center'
                         />
                       </div>
-                      <div className='col-xs-6 db-col-right' id="textColorDiv" style={{ width: '70px', marginLeft: '4px' }}>
+                      <div className='col-xs-4 db-col-right' id="textColorDiv" style={{ width: '72px'}}>
                         <div className='db-color-container'>
                           <div className='db-color-input'>
                             <ColorPickerComponent
@@ -2205,7 +2280,7 @@ render() {
                     <div className='row db-prop-row'>
                       <div className='col-xs-6 db-col-left'>
                        <div>
-                        <ToolbarComponent id="toolbarTextStyle" overflowMode="Scrollable" clicked={this.diagramPropertyBinding.toolbarTextStyleChange.bind(this.diagramPropertyBinding)}>
+                        <ToolbarComponent id="toolbarTextStyle" overflowMode="MultiRow" clicked={this.diagramPropertyBinding.toolbarTextStyleChange.bind(this.diagramPropertyBinding)}>
                           <ItemsDirective>
                             <ItemDirective prefixIcon="sf-icon-bold" tooltipText="Bold" cssClass="tb-item-start" />
                             <ItemDirective prefixIcon="sf-icon-italic" tooltipText="Italic" cssClass="tb-item-middle" />
@@ -2216,7 +2291,7 @@ render() {
                       </div>
                       <div className='col-xs-6 db-col-right'>
                         <div>
-                        <ToolbarComponent id="toolbarTextSubAlignment" overflowMode="Scrollable"  clicked={this.diagramPropertyBinding.toolbarTextSubAlignChange.bind(this.diagramPropertyBinding)}>
+                        <ToolbarComponent id="toolbarTextSubAlignment" overflowMode="MultiRow"  clicked={this.diagramPropertyBinding.toolbarTextSubAlignChange.bind(this.diagramPropertyBinding)}>
                           <ItemsDirective>
                             <ItemDirective prefixIcon="sf-icon-align-left" tooltipText="Align Text Left" cssClass="tb-item-start" />
                             <ItemDirective prefixIcon="sf-icon-align-center" tooltipText="Align Text Center" cssClass="tb-item-middle" />
@@ -2227,22 +2302,22 @@ render() {
                       </div>
                     </div>
                     <div className='row db-prop-row' id='toolbarTextAlignmentDiv'>
-                      <ToolbarComponent id="toolbarTextAlignment" overflowMode="Scrollable" clicked={this.diagramPropertyBinding.toolbarTextAlignChange.bind(this.diagramPropertyBinding)}>
+                      <ToolbarComponent id="toolbarTextAlignment" overflowMode="MultiRow" clicked={this.diagramPropertyBinding.toolbarTextAlignChange.bind(this.diagramPropertyBinding)}>
                         <ItemsDirective>
-                          <ItemDirective prefixIcon="sf-icon-align-text-left" tooltipText="Align Right" cssClass="tb-item-start" />
+                          <ItemDirective prefixIcon="sf-icon-align-text-left" tooltipText="Align Left" cssClass="tb-item-start" />
                           <ItemDirective prefixIcon="sf-icon-align-text-horizontal-center" tooltipText="Align Center" cssClass="tb-item-middle" />
-                          <ItemDirective prefixIcon="sf-icon-align-text-right" tooltipText="Align left" cssClass="tb-item-middle" />
-                          <ItemDirective prefixIcon="sf-icon-align-text-bottom" tooltipText="Align Top" cssClass="tb-item-middle" />
+                          <ItemDirective prefixIcon="sf-icon-align-text-right" tooltipText="Align Right" cssClass="tb-item-middle" />
+                          <ItemDirective prefixIcon="sf-icon-align-text-bottom" tooltipText="Align Bottom" cssClass="tb-item-middle" />
                           <ItemDirective prefixIcon="sf-icon-align-text-vertical-center" tooltipText="Align Middle" cssClass="tb-item-middle" />
-                          <ItemDirective prefixIcon="sf-icon-align-text-top" tooltipText="Align Bottom" cssClass="tb-item-end" />
+                          <ItemDirective prefixIcon="sf-icon-align-text-top" tooltipText="Align Top" cssClass="tb-item-end" />
                         </ItemsDirective>
                       </ToolbarComponent>
                     </div>
-                    <div className='row db-prop-row'>
-                      <div className='col-xs-2 db-col-right db-prop-text-style' style={{ marginRight: '12px', paddingTop: '6px' }}>
+                    <div className='row db-prop-row' id='textOpacityProperty'>
+                      <div className='col-xs-2 db-col-right db-prop-text-style' style={{ marginRight: '5px', paddingTop: '6px' }}>
                         <span className='db-prop-text-style'>Opacity</span>
                       </div>
-                      <div className='col-xs-8 db-col-left' style={{ width: '130px', paddingRight: '10px', marginLeft: '5px' }}>
+                      <div className='col-xs-8 db-col-left' style={{ width: '120px', paddingRight: '10px', marginLeft: '10px' }}>
                         <SliderComponent
                           id='opacityTextSlider'
                           ref={fontOpacity => this.fontOpacity = fontOpacity}
@@ -2285,7 +2360,6 @@ render() {
                 </div>
               </div>
               <div className="row db-dialog-prop-row">
-                <div className="col-xs-6 db-col-left">
                   <div className="row">Format</div>
                   <div className="row db-dialog-child-prop-row">
                     <DropDownListComponent
@@ -2295,19 +2369,6 @@ render() {
                       fields={this.dropdownListFields}
                       onChange={this.exportFormatChange}
                     />
-                  </div>
-                </div>
-                <div className="col-xs-6 db-col-right">
-                  <div className="row">Region</div>
-                  <div className="row db-dialog-child-prop-row">
-                    <DropDownListComponent
-                      id="exportRegion"
-                      value={this.selectedItem.exportSettings.region}
-                      dataSource={this.dropDownDataSources.diagramRegions}
-                      fields={this.dropdownListFields}
-                      onChange={this.exportRegionChange}
-                    />
-                  </div>
                 </div>
               </div>
             </div>
@@ -2391,7 +2452,11 @@ render() {
         shortCutSpan.textContent = shortCutText;
         shortCutSpan.style.pointerEvents = 'none';
         args.element.appendChild(shortCutSpan);
-        shortCutSpan.setAttribute('class', 'db-shortcut');
+        if (shortCutText === 'Ctrl+X') {
+          shortCutSpan.setAttribute('class', 'db-shortcut-cut');
+        }else {
+          shortCutSpan.setAttribute('class', 'db-shortcut');
+        }
     }
     const status = this.UtilityMethods.enableMenuItems(args.item.text, this.selectedItem);
     if (status) {
@@ -2486,7 +2551,7 @@ render() {
   // Renders the DropDown template for the zoom toolbar
   zoomTemplate() {
     return (<div id="template_toolbar">
-      <DropDownButtonComponent id="btnZoomIncrement" items={this.dropDownDataSources.zoomMenuItems} content={Math.round(this.selectedItem.selectedDiagram.scrollSettings.currentZoom* 100)+'%'} select={zoomchange} />
+      <DropDownButtonComponent id="btnZoomIncrement" items={this.dropDownDataSources.zoomMenuItems} content={Math.round(this.selectedItem.selectedDiagram.scrollSettings.currentZoom* 100)+' %'} select={zoomchange} />
     </div>);
   }
 
@@ -2499,27 +2564,33 @@ render() {
     switch (args.item.text) {
       case 'Zoom In':
           diagram.zoomTo({ type: 'ZoomIn', zoomFactor: 0.2 });
-          zoomCurrentValue.content = (diagram.scrollSettings.currentZoom * 100).toFixed() + '%';
+          zoomCurrentValue.content = (diagram.scrollSettings.currentZoom * 100).toFixed() + ' %';
           break;
       case 'Zoom Out':
           diagram.zoomTo({ type: 'ZoomOut', zoomFactor: 0.2 });
-          zoomCurrentValue.content = (diagram.scrollSettings.currentZoom * 100).toFixed() + '%';
+          zoomCurrentValue.content = (diagram.scrollSettings.currentZoom * 100).toFixed() + ' %';
           break;
       case 'Zoom to Fit':
           diagram.fitToPage({ mode: 'Page', region: 'Content'});
           zoomCurrentValue.content = diagram.scrollSettings.currentZoom;
           break;
-      case 'Zoom to 50%':
-          zoom.zoomFactor = (0.5 / currentZoom) - 1;
-          diagram.zoomTo(zoom);
+      case 'Zoom to 50 %':
+          if (currentZoom !== 0.5) {
+            zoom.zoomFactor = (0.5 / currentZoom) - 1;
+            diagram.zoomTo(zoom);
+          }
           break;
-      case 'Zoom to 100%':
-          zoom.zoomFactor = (1 / currentZoom) - 1;
-          diagram.zoomTo(zoom);
+      case 'Zoom to 100 %':
+          if (currentZoom !== 1) {
+            zoom.zoomFactor = (1 / currentZoom) - 1;
+            diagram.zoomTo(zoom);
+          }
           break;
-      case 'Zoom to 200%':
-          zoom.zoomFactor = (2 / currentZoom) - 1;
-          diagram.zoomTo(zoom);
+      case 'Zoom to 200 %':
+          if (currentZoom !== 2) {
+            zoom.zoomFactor = (2 / currentZoom) - 1;
+            diagram.zoomTo(zoom);
+          }
           break;
       default:
             break;
@@ -2716,13 +2787,15 @@ render() {
     switch(command){
       case 'new':
               diagram.clear();
+              this.diagramEvents.historyChange();
               break;
       case 'save':
-              this.download(diagram.saveDiagram());
+              download(diagram.saveDiagram());
               break;
       case 'export':
-              this.selectedItem.exportSettings.fileName = document.getElementById('diagramName').innerHTML;
-              document.getElementById('exportfileName').value = document.getElementById('diagramName').innerHTML;
+              let fileName = document.getElementById('diagramName').innerHTML ? document.getElementById('diagramName').innerHTML : 'Untitled Diagram';
+              this.selectedItem.exportSettings.fileName = fileName;
+              document.getElementById('exportfileName').value = fileName;
               this.exportDialog.show();
               break;
       case 'open':
@@ -2750,23 +2823,25 @@ render() {
               diagram.remove();
               break;
       case 'insertimage':
-              this.openUploadBox('.jpg,.png,.bmp');
+              this.openUploadBox('.jpg,.png,.svg');
               break;
       case 'showguides':
               diagram.snapSettings.constraints = diagram.snapSettings.constraints ^ SnapConstraints.SnapToObject;
               args.item.iconCss = args.item.iconCss ? '' : 'sf-icon-check-tick';
+              this.showGuides.checked = !this.showGuides.checked;
               break;
       case 'showgrid':
               diagram.snapSettings.constraints = diagram.snapSettings.constraints ^ SnapConstraints.ShowLines;
               args.item.iconCss = args.item.iconCss ? '' : 'sf-icon-check-tick';
+              this.showGrid.checked = !this.showGrid.checked;
               break;
       case 'snaptogrid':
               diagram.snapSettings.constraints = diagram.snapSettings.constraints ^ SnapConstraints.SnapToLines;
               args.item.iconCss = args.item.iconCss ? '' : 'sf-icon-check-tick';
+              this.snapToGrid.checked = !this.snapToGrid.checked;
               break;
       case 'fittoscreen':
               diagram.fitToPage({ mode: 'Page', region: 'Content', margin: { left: 0, top: 0, right: 0, bottom: 0 } });
-              args.item.iconCss = args.item.iconCss ? '' : 'sf-icon-check-tick';
               break;
       case 'fittowidth':
               diagram.fitToPage({ mode: 'Width', region: 'Content', margin: { left: 0, top: 0, right: 0, bottom: 0 } });
@@ -2774,45 +2849,73 @@ render() {
       case 'showrulers':
               diagram.rulerSettings.showRulers = !diagram.rulerSettings.showRulers;
               args.item.iconCss = args.item.iconCss ? '' : 'sf-icon-check-tick';
+              this.showRulers.checked = !this.showRulers.checked;
               break;
-      case 'pagebreak':
-            args.item.iconCss = args.item.iconCss ? '' : 'sf-icon-check-tick';
-            if(args.item.iconCss){
-              diagram.pageSettings.showPageBreaks = true;
-              this.selectedItem.pageSettings.pageBreaks = true;
-            }
-            else{
-              diagram.pageSettings.showPageBreaks = false;
-              this.selectedItem.pageSettings.pageBreaks = false;
-            }
-            this.showPageBreaks.checked = !this.showPageBreaks.checked;
-            break;
-            case 'landscape':
-                args.item.parentObj.items[1].iconCss = '';
-                args.item.iconCss = 'sf-icon-check-tick';
-                diagram.pageSettings.orientation = 'Landscape';
-                document.getElementById('pageLandscape').classList.add('e-active');
-                document.getElementById('pagePortrait').classList.remove('e-active');
-                break;
-            case 'portrait':
-                args.item.parentObj.items[0].iconCss = '';
-                args.item.iconCss = 'sf-icon-check-tick';
-                diagram.pageSettings.orientation = 'Portrait';
-                document.getElementById('pagePortrait').classList.add('e-active');
-                document.getElementById('pageLandscape').classList.remove('e-active');
-                break;
-            case 'letter(8.5inx11in)':
-            case 'legal(8.5inx14in)':
-            case 'a3(297mmx420mm)':
-            case 'a4(210mmx297mm)':
-            case 'a5(148mmx210mm)':
-            case 'a6(105mmx148mm)':
-            case 'tabloid(279mmx432mm)':
-              this.diagramPropertyBinding.paperListChange(args, diagram);
-              this.diagramPropertyBinding.updateSelection(args.item);
-              var pageformat = document.getElementById('pageSettingsList').ej2_instances[0];
-              pageformat.element.value = args.item.text;
-              break;
+      // case 'pagebreak':
+      //       diagram.constraints = diagram.constraints &= ~ DiagramConstraints.UndoRedo;
+      //       args.item.iconCss = args.item.iconCss ? '' : 'sf-icon-check-tick';
+      //       if(args.item.iconCss){
+      //         diagram.pageSettings.showPageBreaks = true;
+      //         this.selectedItem.pageSettings.pageBreaks = true;
+      //       }
+      //       else{
+      //         diagram.pageSettings.showPageBreaks = false;
+      //         this.selectedItem.pageSettings.pageBreaks = false;
+      //       }
+      //       this.showPageBreaks.checked = !this.showPageBreaks.checked;
+      //       diagram.dataBind();
+      //       diagram.constraints = diagram.constraints |= DiagramConstraints.UndoRedo;
+      //       break;
+      // case 'multiplepage' :
+      //       diagram.constraints = diagram.constraints &= ~ DiagramConstraints.UndoRedo;
+      //       args.item.iconCss = args.item.iconCss ? '' : 'sf-icon-check-tick';
+      //       if(args.item.iconCss){
+      //         diagram.pageSettings.multiplePage = true;
+      //         this.selectedItem.pageSettings.multiplePage = true;
+      //       }
+      //       else{
+      //         diagram.pageSettings.multiplePage = false;
+      //         this.selectedItem.pageSettings.multiplePage = false;
+      //       }
+      //       diagram.dataBind();
+      //       diagram.constraints = diagram.constraints |= DiagramConstraints.UndoRedo;
+      //       break;
+            // case 'landscape':
+            //     diagram.constraints = diagram.constraints &= ~ DiagramConstraints.UndoRedo;
+            //     args.item.parentObj.items[1].iconCss = '';
+            //     args.item.iconCss = 'sf-icon-check-tick';
+            //     diagram.pageSettings.orientation = 'Landscape';
+            //     this.selectedItem.pageSettings.isPortrait = false;
+            //     this.selectedItem.pageSettings.isLandscape = true;
+            //     document.getElementById('pageLandscape').classList.add('e-active');
+            //     document.getElementById('pagePortrait').classList.remove('e-active');
+            //     diagram.dataBind();
+            //     diagram.constraints = diagram.constraints |= DiagramConstraints.UndoRedo;
+            //     break;
+            // case 'portrait':
+            //     diagram.constraints = diagram.constraints &= ~ DiagramConstraints.UndoRedo;
+            //     args.item.parentObj.items[0].iconCss = '';
+            //     args.item.iconCss = 'sf-icon-check-tick';
+            //     diagram.pageSettings.orientation = 'Portrait';
+            //     this.selectedItem.pageSettings.isPortrait = true;
+            //     this.selectedItem.pageSettings.isLandscape = false;
+            //     document.getElementById('pagePortrait').classList.add('e-active');
+            //     document.getElementById('pageLandscape').classList.remove('e-active');
+            //     diagram.dataBind();
+            //     diagram.constraints = diagram.constraints |= DiagramConstraints.UndoRedo;
+            //     break;
+            // case 'letter(216mmx280mm)':
+            // case 'legal(216mmx356mm)':
+            // case 'a3(297mmx420mm)':
+            // case 'a4(210mmx297mm)':
+            // case 'a5(148mmx210mm)':
+            // case 'a6(105mmx148mm)':
+            // case 'tabloid(279mmx432mm)':
+            //   this.diagramPropertyBinding.paperListChange(args, diagram);
+            //   this.diagramPropertyBinding.updateSelection(args.item);
+            //   var pageformat = document.getElementById('pageSettingsList').ej2_instances[0];
+            //   pageformat.element.value = args.item.text;
+            //   break;
       case 'insertlink':
       this.toolbarInsertClick(args)
           break;
@@ -2837,23 +2940,6 @@ render() {
         break;
     }
   }
-
-  //Function To save the diagram
-  download(data) {
-    if (window.navigator.msSaveBlob) {
-      let blob = new Blob([data], { type: 'data:text/json;charset=utf-8,' });
-      window.navigator.msSaveOrOpenBlob(blob, 'Diagram.json');
-    }
-    else {
-      let dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(data);
-      let a = document.createElement('a');
-      a.href = dataStr;
-      a.download = document.getElementById('diagramName').innerHTML + '.json';
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-    }
-  };
 
   // Function to handle mouseover events on the menu bar items and manage their behavior, including toggling dropdown menus and applying styles.
   menumouseover(args) {
@@ -2895,7 +2981,8 @@ render() {
     defaultUpload.clearAll();
     this.extensionType = defaultUpload.allowedExtensions = extensionType;
     defaultUpload.dataBind();
-    document.getElementsByClassName('e-file-select-wrap')[0].children[0].click();
+    document.getElementsByClassName('e-file-select-wrap')[0].querySelector('button').click();
+    // this.extensionType = defaultUpload.allowedExtensions = '.json';
   };
 
   // Handles insert actions like hyperlink and image from the toolbar.
@@ -2918,7 +3005,7 @@ render() {
                 this.hyperlinkDialog.show();
                 break;
             case "insertimage":
-                this.openUploadBox(".jpg,.png,.bmp");
+                this.openUploadBox(".jpg,.png,.svg");
                 break;
             default:
                 break;
@@ -2961,14 +3048,11 @@ render() {
   // Function to handle the export button click and initiate the export process.
   btnExportClick() {
     let diagram = this.selectedItem.selectedDiagram;
-    let region = document.getElementById("exportRegion").ej2_instances[0];
     let format = document.getElementById("exportFormat").ej2_instances[0];
     // var fileName = document.getElementById("diagramEditable").ej2_instances[0];
     diagram.exportDiagram({
       fileName: document.getElementById('exportfileName').value,
       format: format.value,
-      region: region.value,
-      multiplePage: diagram.pageSettings.multiplePage
     });
     this.exportDialog.hide();
   }
@@ -2976,14 +3060,14 @@ render() {
 
   // Function to handle the print button click and initiate the print process.
   btnPrintClick() {
-    let pageWidth = this.selectedItem.printSettings.pageWidth;
-    let pageHeight = this.selectedItem.printSettings.pageHeight;
+    let pageWidth = this.selectedItem.pageSettings.pageWidth;
+    let pageHeight = this.selectedItem.pageSettings.pageHeight;
     const diagram = this.selectedItem.selectedDiagram;
     diagram.print({
       "region": 'Content',
       "pageHeight": pageHeight, "pageWidth": pageWidth,
-      "multiplePage": !this.selectedItem.printSettings.multiplePage,
-      "pageOrientation": this.selectedItem.printSettings.isPortrait ? 'Portrait' : 'Landscape'
+      "multiplePage": diagram.pageSettings.multiplePage,
+      "pageOrientation": this.selectedItem.pageSettings.isPortrait ? 'Portrait' : 'Landscape'
     });
   }
 
@@ -3064,7 +3148,7 @@ render() {
               this.exportDialog.show();
               break;
           case 'save':
-              this.download(diagram.saveDiagram());
+              download(diagram.saveDiagram());
               break;
           case 'fillcolor':
             var objColor = diagram.selectedItems.nodes[0]? 'nodeFillColor':'lineColor'
@@ -3088,6 +3172,7 @@ render() {
               diagram.moveForward();
               break;
           case 'pantool':
+              diagram.clearSelection();
               diagram.tool = DiagramTools.ZoomPan;
               break;
           case 'selecttool':
@@ -3205,6 +3290,7 @@ render() {
         removeUrl: 'https://services.syncfusion.com/react/production/api/FileUploader/Remove'
       },
       success: this.onUploadSuccess,
+      // allowedExtensions: '.json',
       showFileList: false
     });
     uploadObj.appendTo('#fileupload');
@@ -3218,13 +3304,19 @@ render() {
         let file = file1.rawFile;
         let fileType = file1.type.toString();
         let reader = new FileReader();
-        if (fileType.toLowerCase() === 'jpg' || fileType.toLowerCase() === 'png') {
+        if (fileType.toLowerCase() === 'jpg' || fileType.toLowerCase() === 'png' || fileType.toLowerCase() === 'svg') {
             reader.readAsDataURL(file);
             reader.onloadend = setImage.bind(this);
         } else {
             reader.readAsText(file);
             if (fileType === 'json' ) {
                 reader.onloadend = loadDiagram.bind(this);
+                let fileName = file.name;
+                if (fileName.includes(".json")) {
+                  fileName = fileName.replace(".json", "");
+                }
+                document.getElementById('diagramName').innerHTML = document.getElementById('diagramEditable').value = fileName;
+                document.getElementById("exportfileName").value = fileName;
                 let uploadObj = document.getElementById('fileupload').ej2_instances[0];
                 uploadObj.clearAll();
             } 
@@ -3236,6 +3328,8 @@ render() {
   loadDiagram(event) {
     let diagrm = document.getElementById('diagram').ej2_instances[0];
     diagrm.loadDiagram(event.target.result);
+    this.diagramEvents.historyChange();
+    diagram.ej2_instances[0].fitToPage({ mode: 'Page', region: 'Content'});
   }
 
   //To load the initial properities of the diagram objects to property panel
@@ -3272,17 +3366,56 @@ render() {
     this.selectedItem.exportSettings.fileName = document.getElementById('diagramName').innerHTML;
   }
 
+  getCommands() {
+    let commands = [
+        {
+          name: 'new',
+          canExecute: function () {
+            return true;
+          },
+          execute: function () {
+            diagramInstance.clear();
+          },
+          gesture: { key: Keys.N, keyModifiers: KeyModifiers.Shift },
+        },
+        {
+          name: 'open',
+          canExecute: function () {
+            return true;
+          },
+          execute: function () {
+            document.getElementsByClassName('e-file-select-wrap')[0].querySelector('button').click();
+          },
+          gesture: { key: Keys.O, keyModifiers: KeyModifiers.Control },
+        },
+        {
+          name: 'save',
+          canExecute: function () {
+            return true;
+          },
+          execute: function () {
+             download(diagramInstance.saveDiagram());
+          },
+          gesture: { key: Keys.S, keyModifiers: KeyModifiers.Control },
+        },
+      ];
+      return commands;
+}
+
   // Sets an image source for the selected node from an uploaded file
   setImage(event) {
     //(document.getElementsByClassName('sb-content-overlay')[0] as HTMLDivElement).style.display = 'none';
     let node = this.selectedItem.selectedDiagram.selectedItems.nodes[0];
-    node.shape = { type: 'Image', source: event.target.result, align: 'None' };
+    if (node) {
+      node.shape = { type: 'Image', source: event.target.result, align: 'None' };
+    }
   }
 
   //Triggers when diagram created event triggered
   created() {
+    diagramInstance = document.getElementById("diagram").ej2_instances[0];
     let diagram = this.selectedItem.selectedDiagram;
-    diagram.fitToPage({ mode: 'Page', region: 'Content' });
+    // diagram.fitToPage({ mode: 'Page', region: 'Content' });
   }
 
   // Function to handle changes in the scroll state and update the zoom content when scrolling in the diagram.
@@ -3297,6 +3430,44 @@ render() {
             }
         }
     }
+  }
+  // Function to context menu click.
+  contextMenuClick(args) {
+    let diagram = this.selectedItem.selectedDiagram;
+    if (args.item.id == 'diagram_contextMenu_cut' || args.item.id == 'diagram_contextMenu_copy') {
+      clipboardObjects = [...diagram.selectedItems.nodes, ...diagram.selectedItems.connectors];
+    } else if (args.item.id == 'pasteObj') {
+      if (clipboardObjects && clipboardObjects.length > 0) {
+        let copyNode = clipboardObjects[0];
+        let pasteNode = {
+          id: copyNode.id + '_' + randomId(),
+          width: copyNode.width,
+          height: copyNode.height,
+          shape: copyNode.shape,
+          style: copyNode.style,
+          annotations: copyNode.annotations,
+          rotateAngle: copyNode.rotateAngle,
+          offsetX: args.event.clientX - 265,
+          offsetY: args.event.clientY - 160,
+        };
+        diagram.add(pasteNode);
+      }
+    }
+  }
+
+  contextMenuOpen(args) {
+    const hiddenItems = [];
+    if (clipboardObjects && clipboardObjects.length > 0) {
+      const isConnector = clipboardObjects[0] instanceof Connector;
+      if (clipboardObjects.length > 1 || isConnector) {
+        hiddenItems.push('pasteObj');
+      } else {
+        hiddenItems.push('diagram_contextMenu_paste');
+      }
+    } else {
+      hiddenItems.push('pasteObj', 'diagram_contextMenu_paste');
+    }
+    args.hiddenItems = hiddenItems;
   }
 
   // Function to define default properties for a nodes in the diagram.
@@ -3333,7 +3504,7 @@ const Footer = () => (
       <div className="diagram-icon">
         <img
           className="footer-logo"
-          src="/assets/dbstyle/common_images/Diagram_Component.svg"
+          src="./assets/dbstyle/common_images/Diagram_Component.svg"
         />
       </div>
       <div className="footer-content">

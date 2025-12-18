@@ -16,30 +16,48 @@ export class UtilityMethods {
     }
 
     // Binds node properties to the selected item
-    bindNodeProperties(node, selectedItem) {
-        selectedItem.preventPropertyChange = true;
-        selectedItem.nodeProperties.offsetX.value = Math.round(node.offsetX * 100) / 100;
-        selectedItem.nodeProperties.offsetY.value = Math.round(node.offsetY * 100) / 100;
-        selectedItem.nodeProperties.width.value = node.width ? Math.round(node.width * 100) / 100 : Math.round(node.minWidth * 100) / 100;
-        selectedItem.nodeProperties.height.value = node.height ? Math.round(node.height * 100) / 100 : Math.round(node.minHeight * 100) / 100;
-        selectedItem.nodeProperties.rotateAngle.value = node.rotateAngle;
-        selectedItem.nodeProperties.strokeColor.value = this.getHexColor(node.style.strokeColor);
-        selectedItem.nodeProperties.strokeStyle.value = node.style.strokeDashArray ? node.style.strokeDashArray : 'None';
-        selectedItem.nodeProperties.strokeWidth.value = node.style.strokeWidth;
-        selectedItem.nodeProperties.fillColor.value = this.getHexColor(node.style.fill);
+    bindNodeProperties(node, selectedItem, isMultiSelect) {
+        selectedItem.preventPropertyChange = true; 
         selectedItem.nodeProperties.opacity.value = node.style.opacity * 100;
-        selectedItem.nodeProperties.opacityText = selectedItem.nodeProperties.opacity.value + '%';
-        selectedItem.nodeProperties.aspectRatio.checked = node.constraints & NodeConstraints.AspectRatio ? true : false;
-        selectedItem.nodeProperties.gradient = node.style.gradient.type !== 'None' ? true : false;
+        if (node.children && node.children.length > 0) {
+            let childNode = selectedItem.selectedDiagram.nameTable[node.children[0]];
+            selectedItem.nodeProperties.offsetX.value = Math.round(node.offsetX * 100) / 100;
+            selectedItem.nodeProperties.offsetY.value = Math.round(node.offsetY * 100) / 100;
+            selectedItem.nodeProperties.width.value = node.width ? Math.round(node.width * 100) / 100 : Math.round(node.minWidth * 100) / 100;
+            selectedItem.nodeProperties.height.value = node.height ? Math.round(node.height * 100) / 100 : Math.round(node.minHeight * 100) / 100;
+            selectedItem.nodeProperties.strokeWidth.value = childNode.style.strokeWidth;
+            selectedItem.nodeProperties.strokeColor.value = this.getHexColor(childNode.style.strokeColor);
+            selectedItem.nodeProperties.strokeStyle.value = childNode.style.strokeDashArray;
+            selectedItem.nodeProperties.fillColor.value = this.getHexColor(childNode.style.fill);
+            selectedItem.nodeProperties.opacity.value = childNode.style.opacity * 100;
+            selectedItem.nodeProperties.opacityText = selectedItem.nodeProperties.opacity.value + '%';
+        }
+        else if (!isMultiSelect) {
+            selectedItem.nodeProperties.offsetX.value = Math.round(node.offsetX * 100) / 100;
+            selectedItem.nodeProperties.offsetY.value = Math.round(node.offsetY * 100) / 100;
+            selectedItem.nodeProperties.width.value = node.width ? Math.round(node.width * 100) / 100 : Math.round(node.minWidth * 100) / 100;
+            selectedItem.nodeProperties.height.value = node.height ? Math.round(node.height * 100) / 100 : Math.round(node.minHeight * 100) / 100;
+            selectedItem.nodeProperties.rotateAngle.value = node.rotateAngle;
+            selectedItem.nodeProperties.strokeWidth.value = node.style.strokeWidth;
+            selectedItem.nodeProperties.strokeColor.value = this.getHexColor(node.style.strokeColor);
+            selectedItem.nodeProperties.strokeStyle.value = node.style.strokeDashArray;
+            selectedItem.nodeProperties.fillColor.value = this.getHexColor(node.style.fill);
+            selectedItem.nodeProperties.opacity.value = node.style.opacity * 100;
+            selectedItem.nodeProperties.opacityText = selectedItem.nodeProperties.opacity.value + '%';
+            let aspectRatioBtn = document.getElementById('aspectRatioBtn').ej2_instances[0];
+            node.constraints & NodeConstraints.AspectRatio ? document.getElementById('aspectRatioBtn').classList.add('e-active') : document.getElementById('aspectRatioBtn').classList.remove('e-active');
+            node.constraints & NodeConstraints.AspectRatio ? aspectRatioBtn.iconCss = 'sf-icon-lock' : aspectRatioBtn.iconCss = 'sf-icon-unlock';
+            selectedItem.nodeProperties.gradient = node.style.gradient.type !== 'None' ? true : false;
+        }
         selectedItem.preventPropertyChange = false;
     }
 
     // Binds text properties to the selected item
     bindTextProperties(text, selectedItem) {
         selectedItem.preventPropertyChange = true;
+        selectedItem.textProperties.fontSize.value = text.fontSize;
         selectedItem.textProperties.fontColor.value = this.getHexColor(text.color);
         selectedItem.textProperties.fontFamily.value = text.fontFamily;
-        selectedItem.textProperties.fontSize.value = text.fontSize;
         selectedItem.textProperties.opacity.value= text.opacity * 100;
         selectedItem.textProperties.opacityText = selectedItem.textProperties.opacity + '%';
         let toolbarTextStyle = document.getElementById('toolbarTextStyle');
@@ -88,12 +106,15 @@ export class UtilityMethods {
     }
 
     // Binds connector properties to the selected item
-    bindConnectorProperties(connector, selectedItem) {
+    bindConnectorProperties(connector, selectedItem, isMultiSelect) {
         selectedItem.preventPropertyChange = true;
-        selectedItem.connectorProperties.lineColor.value = this.getHexColor(connector.style.strokeColor);
-        selectedItem.connectorProperties.lineWidth.value = connector.style.strokeWidth;
         selectedItem.connectorProperties.opacity.value = connector.style.opacity * 100;
-        selectedItem.connectorProperties.opacityText = selectedItem.connectorProperties.opacity + '%';
+        if (!isMultiSelect) {
+            selectedItem.connectorProperties.lineColor.value = this.getHexColor(connector.style.strokeColor);
+            selectedItem.connectorProperties.lineWidth.value = connector.style.strokeWidth;
+            selectedItem.connectorProperties.opacity.value = connector.style.opacity * 100;
+            selectedItem.connectorProperties.opacityText = selectedItem.connectorProperties.opacity + '%';
+        }
         selectedItem.preventPropertyChange = false;
     }
 
@@ -252,10 +273,20 @@ export class UtilityMethods {
                            return true;
                        case 'delete':
                            return true;
+                        case 'insertlink':
+                            return true;
+                        case 'insertimage':
+                            return true;
                         default:
                             break;
                    }
                }
+               else if (selectedItems && selectedItems.length > 0 && selectedItems[0]
+                    && selectedItems[0].children && selectedItems[0].children.length > 0 ) {
+                    if (commandType === 'InsertImage') {
+                        return true;
+                   }
+                }
                if (!(diagram.commandHandler.clipboardData.pasteIndex !== undefined
                    && diagram.commandHandler.clipboardData.clipObject !==undefined) && itemText === 'Paste') {
                    return true;

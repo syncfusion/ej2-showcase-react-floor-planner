@@ -24,6 +24,7 @@ input, button, select, textarea {
 
 .e-symbolpalette {
     display: block;
+    border-right: 1px solid #CBCBCB;
 }
 
 .header {
@@ -73,6 +74,8 @@ input, button, select, textarea {
 
 .db-diagram-name-container.db-edit-name #diagramEditable {
     display: block;
+    background-color: white;
+    color: black;
 }
 
 .db-diagram-name {
@@ -90,7 +93,7 @@ input, button, select, textarea {
 
 #diagramName:hover {
     cursor: pointer;
-    color: #E4F0FE;
+    /* color: black; */
 }
 
 .db-menu-container {
@@ -133,6 +136,9 @@ input, button, select, textarea {
 .row {
     margin-left:0px;
     margin-right:0px;
+}
+.row .db-border-style .db-prop-row{
+    margin-top: 15px;
 }
 
 .sidebar {
@@ -179,7 +185,7 @@ input, button, select, textarea {
     border-style: solid;
     border-width: 1px 0px 1px 1px;
     width: 100%;
-    margin: 0px;
+    margin-top: 7px;
     height: 40px !important;
 }
 
@@ -251,34 +257,7 @@ input, button, select, textarea {
 
 /* Window Show/Hide Customization - start */
 
-/* .diagrambuilder-container.hide-menubar .db-header-container {
-    display: none;
-}
 
-.diagrambuilder-container.hide-menubar .sidebar,
-.diagrambuilder-container.hide-menubar .main-content {
-    top: 48px;
-    height: calc(100% - 48px);
-}
-
-.diagrambuilder-container.hide-toolbar .db-toolbar-editor {
-    display: none;
-}
-
-.diagrambuilder-container.hide-toolbar .sidebar, 
-.diagrambuilder-container.hide-toolbar .main-content {
-    height: calc(100% - 64px);
-} */
-
-
-/* .diagrambuilder-container.hide-palette .main-content {
-    left: 0px;
-    width: 100%;
-}
-
-.diagrambuilder-container.hide-palette .sidebar {
-    display: none;
-} */
 
 .diagrambuilder-container.hide-properties .main-content {
     width: 100%;
@@ -290,100 +269,16 @@ input, button, select, textarea {
     float: left;
 }
 
-.diagrambuilder-container.hide-properties .db-property-editor-container {
-    display: none;
-}
-
-.diagrambuilder-container.hide-properties .db-diagram-container {
-    width: 100%;
-}
-
 .db-current-diagram-container {
-    height: calc(100% );
+    height: calc(99% );
 }
 
-.diagrambuilder-container.hide-pager .db-current-diagram-container {
-    height: 100%;
-}
-
-.diagrambuilder-container.hide-pager .db-more-diagram-options-container {
-    display: none;
-}
-
-/* .diagrambuilder-container.custom-diagram .sidebar {
-    z-index: 100000000;
-    width: 30px;
-    display: block;
-}
-
-.diagrambuilder-container.custom-diagram .db-palette-parent {
-    display: none;
-}
-
-.diagrambuilder-container.custom-diagram .db-palette-more-shapes {
-    width: 30px;
-    border-right: 1px solid #CBCBCB;
-    padding: 0px 6px;
-}
-
-.diagrambuilder-container.custom-diagram .db-palette-more-shapes-text {
-    display: none;
-}
-
-.diagrambuilder-container.custom-diagram .db-more-diagram-options-container {
-    width: calc(100% - 298px);
-    position: absolute;
-    left: 28px;
-} */
-
-/* Window Show/Hide Customization - end */
-
-/* Show/Hide Diagram's Ruler/Grid Customization - Start */
-
-/* .db-current-diagram-container {
-    border-top: 1px solid #CBCBCB;
-    border-left: 1px solid #CBCBCB;
-} */
 
 .db-current-diagram-container.db-show-ruler {
     border-width: 0px;
 }
 
 /* Show/Hide Diagram's Ruler/Grid Customization - End */
-
-
-/* Page Options Customizaion - Start */
-
-/* .db-more-diagram-options-container {
-    height: 28px;
-    background-color:#F1F1F1; 
-    border-top: 1px solid #CBCBCB;
-    border-left: 1px solid #CBCBCB;
-}
-
-#pageOptionList {
-    height: 100%;
-}
-
-.db-more-diagram-options-container .e-btn {
-    text-transform: none;
-    font-weight: 400;
-    font-size: 12px;
-    box-shadow: 0 0 0 0;
-    height: 100%;
-    border-width: 0px 1px 0px 0px;
-    border-color: #D4D4D4;
-    color: #515151;
-    background-color: #f0f0f0;
-    text-overflow: ellipsis;
-    overflow: hidden;
-}
-
-.db-more-diagram-options-container .e-btn.db-active-page {
-    background-color: #ffffff;
-} */
-
-/* Page Options Customizaion - End */
 
 /* Diagram Adorner Layer, Ruler, Context Menu Customization - Start */
 
@@ -523,6 +418,10 @@ input, button, select, textarea {
     box-shadow: 0 0 0 0;
 }
 
+.e-dropdown-btn .e-caret, .e-dropdown-btn.e-btn .e-caret {
+    margin-top: -3px;
+}
+
 .e-dropdown-popup,
 .e-contextmenu-wrapper ul.e-contextmenu  {
     border: 0.5px solid #cccccc;
@@ -587,9 +486,15 @@ input, button, select, textarea {
 }
 
 .db-shortcut {
-    float: right;
+    /* float: right; */
     color: #999999;
     font-size: 12px;
+    margin-left: 30px;
+}
+.db-shortcut-cut {
+    color: #999999;
+    font-size: 12px;
+    margin-left: 42px;
 }
 
 /* Menu Bar Customization - End */
@@ -606,6 +511,7 @@ input, button, select, textarea {
     height: 35px;
     width: 100%;
     background: #e3e3e3;
+    padding-top: 2px;
 }
 
 .e-toolbar .e-toolbar-items .e-toolbar-item {
@@ -947,6 +853,10 @@ input, button, select, textarea {
     color: #ffffff;
 }
 
+.e-input-group .e-input-group-icon:last-child, .e-input-group.e-control-wrapper .e-input-group-icon:last-child, .e-input-group.e-small .e-input-group-icon:last-child, .e-input-group.e-control-wrapper.e-small .e-input-group-icon:last-child {
+    margin-right: 5px;
+}
+
 /* Toolbar Customization - End */
 
 /* Dialog Content - Customization - Start */
@@ -1116,10 +1026,54 @@ input[type="color"]::-moz-color-swatch {
 
 /* Property Panel Customization - End */
 
-/* .db-property-editor-container .e-input-group, 
-.db-property-editor-container .e-input-group.e-control-wrapper {
-    margin-bottom: 0px;
-} */
+/* Dialog Customization start */
+
+.e-dialog {
+    border: 1px solid #E0E0E0;
+    border-radius: 4px;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.26);
+}
+
+.e-dialog .e-dlg-header-content {
+    height: 36px;
+    padding: 9.5px 4px 9.5px 16px;
+    border-bottom: 1px solid #D5D5D5;
+}
+
+#openTemplateDialog .e-dlg-header-content {
+    height: 44px;
+    padding: 13.5px 4px 13.5px 16px;
+}
+
+#themeDialog .e-dlg-header-content {
+    padding: 9.5px 4px 9.5px 6px;
+}
+
+.e-dialog .e-dlg-header-content .e-dlg-header {
+    font-size: 14px;
+    font-weight: 500;
+    margin-top: -5px;
+}
+
+.e-dialog .e-dlg-header-content+.e-dlg-content {
+    padding: 16px;
+}
+
+.e-dialog .e-dlg-header-content+.e-dlg-content input[type="text"]:not(.e-dropdownbase):not(.db-layer-edit):not(.e-input) {
+    width: 100%;
+    height: 28px;
+    font-weight: normal;
+    text-indent: 5px;
+    border: 1px solid #D5D5D5;
+}
+
+.e-dialog .e-dlg-header-content .e-btn.e-dlg-closeicon-btn {
+    left: 0px;
+    padding: 0;
+    top: -6px;
+}
+
+/* Dialog Customization end */
 
 /* Numeric Text box Customization - Start */
 
@@ -1148,21 +1102,6 @@ input[type="color"]::-moz-color-swatch {
     text-indent: 5px;
     border: 1px solid #E0E0E0;
     border-radius: 3px;
-}
-
-.e-float-input.e-input-group.e-control-wrapper.e-numeric .e-numeric-hidden,
-.e-input-group.e-control-wrapper.e-numeric .e-numeric-hidden,
-.e-float-input.e-control-wrapper.e-numeric .e-numeric-hidden,
-.e-float-input.e-input-group.e-control-wrapper.e-numeric.e-input-focus .e-numeric-hidden,
-.e-input-group.e-control-wrapper.e-numeric.e-input-focus .e-numeric-hidden,
-.e-float-input.e-control-wrapper.e-numeric.e-input-focus .e-numeric-hidden {
-  border: 0;
-  height: 0;
-  margin: 0;
-  padding: 0;
-  text-indent: 0;
-  visibility: hidden;
-  width: 0;
 }
 
 .e-numeric.e-input-group .e-input-group-icon {
@@ -1212,7 +1151,7 @@ input[type="color"]::-moz-color-swatch {
 .e-control-wrapper.e-slider-container.e-horizontal,
 .e-control-wrapper.e-slider-container.e-horizontal .e-slider {
     height: 28px;
-    top: 0px;
+    top: 1px;
 }
 
 .e-control-wrapper.e-slider-container .e-slider .e-handle {
@@ -1226,434 +1165,6 @@ input[type="color"]::-moz-color-swatch {
 
 /* Slider Control Customization - End */
 
-/* Dialog Customization start */
-
-.e-dialog {
-    border: 1px solid #E0E0E0;
-    border-radius: 4px;
-    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.26);
-}
-
-.e-dialog .e-dlg-header-content {
-    height: 36px;
-    padding: 9.5px 4px 9.5px 16px;
-    border-bottom: 1px solid #D5D5D5;
-}
-
-#openTemplateDialog .e-dlg-header-content {
-    height: 44px;
-    padding: 13.5px 4px 13.5px 16px;
-}
-
-#themeDialog .e-dlg-header-content {
-    padding: 9.5px 4px 9.5px 6px;
-}
-
-.e-dialog .e-dlg-header-content .e-dlg-header {
-    font-size: 14px;
-    font-weight: 500;
-    margin-top: -5px;
-}
-
-.e-dialog .e-dlg-header-content + .e-dlg-content {
-    padding: 16px;
-}
-
-.e-dialog .e-dlg-header-content + .e-dlg-content input[type="text"]:not(.e-dropdownbase):not(.db-layer-edit):not(.e-input) {
-    width: 100%;
-    height: 28px;
-    font-weight: normal;
-    text-indent: 5px;
-    border: 1px solid #D5D5D5;
-}
-
-
-.e-dialog .e-footer-content {
-    padding: 24px 16px 16px 16px;
-}
-
-#btnDownloadFile,
-#customPropertyDialog .e-dlg-content .e-btn,
-.e-dialog .e-btn.e-flat.e-primary {
-    background-color: #ffffff;
-    border-color: #D5D5D5;
-    text-transform: none;
-    color: #515151;
-    border-radius: 2px;
-    min-width: 100px;
-}
-
-#btnDownloadFile:focus
-#customPropertyDialog .e-dlg-content .e-btn:focus
-.e-dialog .e-btn.e-flat.e-primary:focus {
-    border-color: gray;
-}
-
-.e-dialog .e-btn.e-flat.e-db-primary.e-primary {
-    background-color: #046AE5;
-    border-color: #0058C1;
-    color: #ffffff;
-}
-
-.e-dialog .e-btn.e-flat.e-db-primary.e-primary:hover,
-.e-dialog .e-btn.e-flat.e-db-primary.e-primary:focus {
-    background-color: #0058C1;
-    color: #ffffff;
-}
-
-.e-dialog .e-dlg-header-content .e-btn.e-dlg-closeicon-btn {
-    left: 0px;
-    padding: 0;
-    top: -6px;
-}
-
-.e-dialog .e-btn.e-dlg-closeicon-btn:hover, 
-.e-dialog .e-btn.e-dlg-closeicon-btn:focus, 
-.e-dialog .e-btn.e-dlg-closeicon-btn:active {
-    background-color: transparent;
-}
-
-/* Print Dialog Customization */
-
-#printDialog .e-dlg-header-content + .e-dlg-content input[type="text"] {
-    height: 100%;
-    border: 0px;
-    text-indent: 0;
-}
-
-#printDialog .db-text {
-    margin-top: 5px;
-}
-
-/* Upload Dialog Customization */
-
-#fileUploadDialog .e-footer-content {
-    padding: 15px 10px 15px 0px;
-}
-
-#uploadInformationDiv {
-    display: none;
-}
-
-#parentChildRelationDiv {
-    display: none;
-}
-
-#moreInformationDiv {
-    display: none;
-}
-
-.e-dlg-content .db-upload-content.firstPage #uploadInformationDiv {
-    display: block;
-}
-
-.e-dlg-content .db-upload-content.secondPage #parentChildRelationDiv {
-    display: block;
-}
-
-.e-dlg-content .db-upload-content.thirdPage #moreInformationDiv {
-    display: block;
-}
-
-#dropArea {
-    padding-top: 15px;
-    position: relative;
-}
-
-#dropRegion {
-    padding: 26px 30%;
-    display: inherit;
-    border: 1px dashed #c3c3cc
-}
-
-.e-upload,
-.e-upload .e-upload-files .e-upload-file-list,
-.e-upload .e-upload-files {
-    border: none;
-}
-
-.e-file-select-wrap {
-    display: none;
-}
-
-.droparea {
-    font-size: 13px;
-}
-
-.db-info-style {
-    float: left;
-    background-image: url('./bpmn_images/infoImage.jpg');
-    background-color: white;
-    background-size: 100%;
-    background-repeat: no-repeat;
-    height: 18px;
-    width: 18px;
-    cursor: pointer;
-    border: none;
-    background-position: center;
-    margin-left: 5px;
-}
-
-.db-info-parent {
-    float: left;
-    background-image: url('./bpmn_images/Note.svg');
-    background-color: white;
-    background-size: 100%;
-    background-repeat: no-repeat;
-    height: 18px;
-    width: 18px;
-    cursor: pointer;
-    border: none;
-    background-position: center;
-    margin-left: 5px;
-}
-
-.db-info-text {
-    float:left; 
-    height: 18px;
-    margin-top:2px
-}
-
-#btnDownloadFile {
-    width: 50%;
-    text-transform: none;
-    box-shadow: 0 0 0 0;
-    margin-top: 7px;
-}
-
-/* More Shapes Dialog Customization */
-
-#moreShapesDialog .e-dlg-content {
-    overflow: hidden;
-    padding: 0px;
-}
-
-#moreShapesDialog .e-listview .e-list-group-item {
-    background-color: rgb(229, 229, 229);
-}
-
-#moreShapesDialog .e-listview .e-text-content.e-checkbox .e-list-text {
-    margin-top: 2px;
-    font-size: 12px;
-}
-
-#moreShapesDialog .temp-left-pane,
-#moreShapesDialog .temp-right-pane {
-    overflow: auto;
-    height: 380px;
-}
-
-#moreShapesDialog .e-checkbox-wrapper .e-frame, .e-css.e-checkbox-wrapper .e-frame {
-    height: 15px;
-    width: 15px;
-}
-
-#moreShapesDialog .e-footer-content {
-    border-top: 1px solid #D5D5D5;
-	padding: 12px;
-}
-
-#moreShapesDialog  .e-listview:not(.e-list-template) .e-list-item {
-    height: 30px;
-    line-height: 30px;
-}
-
-/* Layer Dialog Customization */
-
-#layerDialog .e-dlg-header-content {
-    background: #ffffff;
-    padding: 10px 10px;
-    border: 1px solid rgb(192, 192, 192);
-}
-
-#layerDialog .e-dlg-content {
-    padding: 0px;
-    background: #ffffff;
-}
-
-#layerDialog .e-footer-content {
-    padding: 0px;
-}
-
-#layerDialog .e-dlg-header-content .e-dlg-header {
-    margin-top: -6px;
-    font-size: 13px;
-}
-
-#layerDialog .db-layer-bottom-panel {
-    top: 0px;
-    position: absolute;
-    right: 0px;
-}
-
-#layerDialog .col-xs-2 {
-    width: 34px;
-    height: 28px;
-    padding-right: 0px;
-}
-
-#layerDialog .db-layer-bottom-panel .e-btn,
-.db-layer-content-btn .e-btn {
-    width: 34px;
-    height: 28px;
-    padding: 0px;
-    margin-left: 0px;
-    background-color: transparent;
-    box-shadow: 0 0 0 0;
-}
-
-.db-layer-content-btn .e-btn .e-btn-icon {
-    pointer-events: none;
-}
-
-#layerDialog .db-layer-bottom-panel .e-btn .e-btn-icon {
-    font-size: 13px;
-}
-
-.db-layer-template {
-    background: #fafafa;
-    border-bottom: 1px solid rgb(229, 229, 229);
-    padding:  4px 10px;
-    height: 36px;
-}
-
-.db-layer-template:hover {
-    background: #EEEEEE;
-}
-
-.db-layer-template.active {
-    background: rgb(230, 239, 248);
-}
-
-.db-layer-content-btn {
-    visibility: hidden;
-}
-
-.db-layer-template:hover .db-layer-content-btn {
-    visibility: visible;
-}
-
-.db-layer-template .db-layer-content-btn.db-layer-invisible {
-    visibility: visible;
-}
-
-.db-layer-content-btn {
-    float: right;
-}
-
-.db-layer-content-name {
-    float: left;
-    display: table;
-    font-size: 12px;
-    color: #515151;
-    height: 28px;
-    cursor: pointer;
-}
-
-input.db-layer-edit {
-    display: none;
-    vertical-align: middle;
-    border: none;
-    background-color: transparent;
-    text-indent: 0px;
-    height: 28px;
-    width: 200px;
-}
-
-.db-layer-content-name .db-layer-name {
-    pointer-events: none;
-    display: inline-block;
-    width: 180px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    margin-top: 6.5px;
-    white-space: nowrap;
-}
-
-.db-layer-content-name.db-layer-editing .db-layer-edit{
-    display: table-cell;
-}
-
-.db-layer-content-name.db-layer-editing .db-layer-name {
-    display: none;
-}
-
-/* Custom Dialog Customization */
-
-.db-custom-prop-info-template {
-    margin-bottom: 8px;
-}
-
-.db-custom-prop-info-template .propertyNameDiv {
-    width: 30%; 
-    height: 20px;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    text-align: right;
-    padding-top: 5px;
-}
-
-.db-custom-prop-info-template .propertyValueDiv {
-    width: calc(60% - 10px); 
-    height: 27px;
-}
-
-.db-custom-prop-info-template .propertyLabelDiv {
-    float: left; 
-    width: 5%;
-    height: 20px;
-    padding-top: 4px;
-}
-
-#customPropertyDialog .e-dlg-content .btnRemoveProperty {
-    height: 20px;
-    width: 20px;
-    min-width: 20px;
-    padding: 0px;
-    background: transparent;
-    border: none;
-    box-shadow: 0 0 0 0;
-}
-
-#customPropertyDialog .e-dlg-content .btnRemoveProperty .e-btn-icon {
-    padding-top:0.5px;
-    font-size: 14px;
-}
-
-#customPropertyDialog .e-dlg-content .btnRemoveProperty:hover {
-    border: 1px solid #D5D5D5;
-}
-
-.propertyTooltipDiv {
-    width: 5%;
-    float: left;
-    margin-left: 10px;
-    padding-top: 5px;
-}
-
-.propertyTooltipDiv .e-checkbox-wrapper .e-frame {
-    width: 16px;
-    height: 16px;
-}
-
-.db-org-diagram .db-place-holder {
-    display: none;
-}
-
-#customPropertyDialog .e-footer-content {
-    display: none;
-}
-
-#themeDialog #themeDialogContent {
-    background-color: #e3e3e3;
-}
-/* .db-general-diagram .db-custom-prop-info-template .propertyValueDiv {
-    width: 70%;
-}
-
-.db-general-diagram .propertyLabelDiv {
-    display: none;
-} */
 
 /* Color Picker Customization */
 
@@ -1662,9 +1173,6 @@ input.db-layer-edit {
     height: 100%;
 }
 
-.e-colorpicker-wrapper .e-split-btn-wrapper .e-split-colorpicker.e-split-btn .e-selected-color {
-    margin-top:-3px;
-}
 
 .e-split-btn-wrapper {
     width: 100%;
@@ -1672,9 +1180,6 @@ input.db-layer-edit {
     /* padding-left: 2px; */
 }
 
-.e-colorpicker-wrapper .e-selected-color {
-    border-radius: 3px;
-}
 
 .e-colorpicker-wrapper .e-split-btn .e-selected-color {
     width: 100% !important;
@@ -1682,140 +1187,6 @@ input.db-layer-edit {
     border-radius: 3px !important;
 }
 
-.e-colorpicker-wrapper .e-dropdown-btn .e-btn-icon {
-    visibility: visible;
-}
-
-.db-color-btn {
-    right: 0px;
-    position: absolute;
-    pointer-events: none;
-}
-
-.e-colorpicker-popup {
-    box-shadow: 0 0 0 0;
-    border: none;
-    background-color: transparent;
-    /* margin-left: 23px;
-    margin-top: 1px; */
-}
-
-.e-colorpicker-popup .e-container {
-    width: 240px;
-}
-
-.e-container .e-palette .e-item {
-    height: 24px;
-    width: 24px;
-}
-
-/* .e-split-btn-wrapper .e-split-btn,
-.e-split-btn-wrapper:hover .e-split-btn {
-    border-right-color: transparent;
-} */
-
-/* Theme Dialog Customization */
-
-#themeDialog .e-dlg-content {
-    padding: 0px;
-}
-
-#themeDialog {
-    min-width: 196px;
-}
-
-.db-theme-style-div {
-    width: 87px;
-    height: 68px;
-    margin: 5px;
-    padding: 5px 3px 5px 7px;
-    background-color: #ffffff;
-    float: left;
-    cursor: pointer;
-}
-.db-theme-focus-style-div {
-    border: 2px solid #006CE6;
-    padding: 4px 2px 4px 6px;
-}
-
-.db-theme-style-div:hover {
-    border: 1px solid #b2b2b2;
-    padding: 4px 2px 4px 6px;
-}
-
-.db-theme-style {
-    width: 77px;
-    height: 58px;
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-    pointer-events: none;
-}
-
-.db-theme-style:hover {
-    border: 2px solid black;
-}
-
-.theme1 {
-    background-image: url('./themes_images/Theme_1.png');
-}
-
-.theme2 {
-    background-image: url('./themes_images/Theme_2.png');
-}
-
-.theme3 {
-    background-image: url('./themes_images/Theme_3.png');
-}
-
-.theme4 {
-    background-image: url('./themes_images/Theme_4.png');
-}
-
-.theme5 {
-    background-image: url('./themes_images/Theme_5.png');
-}
-
-.theme6 {
-    background-image: url('./themes_images/Theme_6.png');
-}
-
-.theme7 {
-    background-image: url('./themes_images/Theme_7.png');
-}
-
-.theme8 {
-    background-image: url('./themes_images/Theme_8.png');
-}
-
-.theme9 {
-    background-image: url('./themes_images/Theme_9.png');
-}
-
-.theme10 {
-    background-image: url('./themes_images/Theme_10.png');
-}
-
-.theme11 {
-    background-image: url('./themes_images/Theme_11.png');
-}
-
-.theme12 {
-    background-image: url('./themes_images/Theme_12.png');
-}
-
-/* Theme Dialog Customization End */
-
-/* DropdownList Customization Start */
-
-.e-dropdownlist .e-ddl input.e-input {
-    text-indent: 5px;
-}
-
-.e-dropdownbase .e-list-item {
-    color: #222222;
-    font-size: 12px;
-}
 
 .e-input-group.e-control-wrapper.e-ddl {
     padding-left: 5px;
@@ -1900,173 +1271,7 @@ input.db-layer-edit {
 
 /* MultiSelect Control Customization End */
 
-/* Radio Button - Customization Start */
-
-.e-radio + label::before {
-    border: 1px solid;
-    border-color: #D4D4D4;
-}
-
-.e-radio:hover + label::before {
-    border-color: #b2b2b2;
-}
-
-.e-radio:checked + label::before {
-    border: 1px solid;
-    border-color: #D4D4D4;
-}
-
-.e-radio:checked + label:hover::before {
-    border: 1px solid;
-    border-color: #b2b2b2;
-}
-
-.e-radio:checked + label::after {
-    background-color: #046AE5;
-    color: #046AE5;
-}
-
-.e-radio:checked + label:hover::after {
-    background-color: #046AE5;
-    color: #046AE5;
-}
-
-.e-radio:checked:focus + label::before {
-    border: 1px solid;
-    border-color: #b2b2b2;
-}
-
-.e-radio:checked:focus + label::after {
-    background-color: #046AE5;
-    color: #046AE5;
-}
-
-/* Radio Button - Customization End */
- 
-/* Diagram Template Style - Start */
-
-.db-diagram-template-div {
-    padding: 10px 0px 10px 10px;
-    float: left;
-}
-
-.db-diagram-template-image-div {
-    height: 160px;
-    width: 160px;
-    background: #fff;
-    border: 1px solid #D5D5D5;
-    cursor: pointer;
-}
-
-.db-diagram-template-svg-blank-image {
-    background-color: white;
-    background-size: contain;
-    background-repeat: no-repeat;
-    width: 32px;
-    height: 32px;
-    background-position: center;
-    margin: 64px;
-    pointer-events: none;
-}
-
-.db-diagram-template-svg-image {
-    background-color: white;
-    background-size: contain;
-    background-repeat: no-repeat;
-    width: 135px;
-    height: 135px;
-    background-position: center;
-    margin: 11.5px;
-    pointer-events: none;
-}
-
-.db-diagram-template-image {
-    background-color: white;
-    background-size: contain;
-    background-repeat: no-repeat;
-    width: 123px;
-    height: 123px;
-    background-position: center;
-    pointer-events: none;
-}
-
-.db-diagram-template-image:hover {
-    border-color: #333333;
-}
-
-.db-diagram-template-text {
-    height: 20px;
-    font-size: 13px;
-    font-weight: 500;
-    color: black;
-    padding-top: 5px;
-}
-
-.db-diagram-template-text span {
-    display: block;
-    width: 160px;
-    text-align: center;
-}
-
-.db-diagram-template-parent-text {
-    font-size: 12px;
-    color: black;
-    padding: 8px 0px;
-    padding-left: 16px;
-    cursor: pointer;
-    height: 30px;
-}
-
-.db-diagram-template-parent-text.active {
-    background-color: #EEEEEE;
-    color: #046AE5;
-}
-
-.db-diagram-template-parent-text:hover {
-    background-color: #EEEEEE;
-}
-
-.db-diagram-template-parent-text span {
-    pointer-events: none;
-}
-
-.temp-left-pane {
-    border-right:1px solid #D4D4D4; 
-    height: 424px;
-    padding: 0px;
-}
-
-.temp-right-pane {
-    height: 424px;
-}
-
-
-
-#openTemplateDialog .e-dlg-content {
-    padding: 0px;
-}
-
-/* Diagram Template Style - End */
-
 /* Show/Hide Property Panel Customization Start */
-
-.db-mindmap-prop-container {
-    display: none;
-}
-
-.db-orgchart-prop-container {
-    display: none;
-}
-
-.db-property-editor-container.mindmap-diagram .db-general-diagram-prop-container,
-.db-property-editor-container.orgchart-diagram .db-general-diagram-prop-container {
-    display: none;
-}
-
-.db-property-editor-container.mindmap-diagram .db-mindmap-prop-container,
-.db-property-editor-container.orgchart-diagram .db-orgchart-prop-container {
-    display: block;
-}
 
 .db-node-prop-container .db-node-behaviour-prop {
     display: block;
@@ -2090,33 +1295,6 @@ input.db-layer-edit {
 
 /* Show/Hide Property Panel Customization End */
 
-/* MindMap and OrgChart Property Panel Customization Start */
-
-#btnImportData {
-    width:100%;
-    height:28px;
-    text-transform: none;
-    box-shadow: 0 0 0 0;
-}
-
-/* MindMap and OrgChart Property Panel Customization End */
-
-/* Common Primary Button Style - Start */
-
-.db-btn-primary {
-    background-color: #046AE5;
-    border: 1px solid #0058C1;
-    border-radius: 3px;
-    color: white;
-}
-
-.db-btn-primary:hover,
-.db-btn-primary:focus {
-    background-color: #0058C1;
-    color: white;
-}
-
-/* Common Primary Button Style - End */
 
 /* Animation At Initial Rendering start */
 
@@ -2201,30 +1379,9 @@ input.db-layer-edit {
     width: auto;
 }
 
-button, input, select, textarea, .e-control.e-dropdownlist .e-input-group.e-ddl input.e-input,
-.e-numeric.e-input-group input.e-input {
-    font-size: 12px;
-    color: #000000;
-    font-weight: normal;
-}
 
 input:focus {
     outline: none;
-}
-
-#showPageBreaks,
-.e-checkbox-wrapper {
-    margin-left: -5px;
-}
-
-.e-checkbox-wrapper .e-frame, .e-css.e-checkbox-wrapper .e-frame {
-    border: 1px solid #D4D4D4;
-}
-
-#moreShapesDialog .e-listview .e-list-item.e-focused .e-checkbox-wrapper .e-frame.e-check, 
-#moreShapesDialog .e-listview .e-list-item.e-focused .e-css.e-checkbox-wrapper .e-frame.e-check {
-	background-color: #046AE5;
-    border-color: transparent;
 }
 
 .e-checkbox-wrapper .e-frame.e-check, .e-css.e-checkbox-wrapper .e-frame.e-check,
@@ -2242,12 +1399,6 @@ textarea.e-input.e-css::selection, .e-input-group input.e-input::selection,
     color: white;
 }
 
-input.e-input::selection,
-.e-diagram-text-edit::selection {
-    background: #046AE5;
-    color: white;
-}
-
 .db-text-input .e-numeric.e-input-group {
     padding: 1px 0px;
     height: 22px;
@@ -2255,64 +1406,22 @@ input.e-input::selection,
     /* margin: 0px 2px 0px 0px; */
 }
 
-.designMenu .e-contextmenu.e-menu-parent{
-    width: auto!important;
+.e-arrow-tip-inner, .e-tip-bottom::before {
+    display: none !important;
 }
 
-.e-input-group.e-input-focus:not(.e-float-icon-left):not(.e-success):not(.e-warning):not(.e-error), 
-.e-input-group.e-control-wrapper.e-input-focus:not(.e-float-icon-left):not(.e-success):not(.e-warning):not(.e-error) {
-    border: none;
+.e-toolbar .e-toolbar-items.e-toolbar-multirow {
+  margin-left: 0px;
+  margin-top: 0px;
+  margin-bottom: 0px;
+  padding-top: 10px;
+  padding-bottom: 30px;
 }
 
-.e-input-group input.e-input:focus, .e-input-group.e-control-wrapper input.e-input:focus {
-    padding: 0px;
-    text-indent: 5px;
+#textPropertyContainer .db-prop-row {
+    margin-bottom: 15px;
 }
 
-.db-place-holder {
-    bottom: 21px;
-    position: absolute;
+.e-toolbar .e-toolbar-items.e-tbar-pos .e-toolbar-left {
+    padding-top: 2px;
 }
-
-.e-tooltip-wrap.e-popup.e-control.e-popup-open {
-    pointer-events: none !important;
-    /* background-color: #000000;
-    color: red; */
-}
-
-.e-control:focus, .e-control *:focus {
-    outline: none;
-}
-
-/* General Customization - End */
-
-.db-html-font-medium {
-    color: #515151;
-    font-size: 13px;
-    font-weight: 500;
-}
-
-.db-html-font-normal {
-    color: #515151;
-    font-size: 12px;
-}
-/* Not Needed As of Now */
-
-/* #shortCutDialog .e-dlg-header-content + .e-dlg-content {
-    padding: 0px;
-}
-
-.db-shortcut-template-div {
-    padding: 5px 16px;
-    font-size: 13px;
-    font-weight: 500;
-    border-bottom: 1px solid #D4D4D4;
-}
-
-#shortcutContainerDiv:last-child {
-    border-bottom: 0px;
-}
-
-#shortCutDialog .col-xs-6 {
-    padding: 0px;
-} */

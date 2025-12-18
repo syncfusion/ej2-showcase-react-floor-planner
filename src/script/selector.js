@@ -340,6 +340,7 @@ export class TextProperties {
         this.mTextPosition = '';
         this.mFontFamily = 'Arial';
         this.mFontColor = '#000000';
+        this.mFontSize = 12;
     }
     get textPosition() {
         return this.mTextPosition;
@@ -417,7 +418,7 @@ export class ExportSettings {
     constructor() {
         this.mFileName = 'Diagram';
         this.mFormat = 'JPG';
-        this.mRegion = 'PageSettings';
+        this.mRegion = 'Content';
     }
     get fileName() {
         return this.mFileName;
@@ -443,9 +444,9 @@ export class PrintSettings {
         this.mRegion = 'PageSettings';
         this.mPageWidth = 0;
         this.mPageHeight = 0;
-        this.mIsPortrait = true;
-        this.mIsLandscape = false;
-        this.mMultiplePage = true;
+        this.mIsPortrait = false;
+        this.mIsLandscape = true;
+        this.mMultiplePage = false;
         this.mPaperSize = 'Letter';
     }
     get region() {

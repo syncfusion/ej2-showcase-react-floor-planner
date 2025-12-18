@@ -2,24 +2,14 @@ var glob = require("glob");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const TerserPlugin = require("terser-webpack-plugin");
-const CopyWebpackPlugin = require("copy-webpack-plugin"); // Import the plugin
+const CopyWebpackPlugin = require("copy-webpack-plugin");
 const path = require("path");
 
 module.exports = {
-  mode: process.env.NODE_ENV || 'development',
   entry: {
-    index: "./src/index.js"
+    index: glob.sync("./src/index.js")
   },
   target: "web",
-  devServer: {
-    static: {
-      directory: path.join(__dirname, 'public'),
-    },
-    compress: true,
-    port: 3000,
-    hot: true,
-    open: true,
-  },
   module: {
     rules: [
       {
@@ -44,6 +34,7 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       template: path.resolve(__dirname, 'public/index.html'),
+      favicon: path.resolve(__dirname, 'public/favicon.ico'),
     }),
     new MiniCssExtractPlugin({
       filename: "index.css",
@@ -51,8 +42,8 @@ module.exports = {
     new CopyWebpackPlugin({
       patterns: [
         {
-          from: path.resolve(__dirname, "public/assets"), // Source folder
-          to: path.resolve(__dirname, "dist/assets"), // Destination folder
+          from: path.resolve(__dirname, "public/assets"),
+          to: path.resolve(__dirname, "dist/assets"), 
         },
       ],
     }),
@@ -70,7 +61,7 @@ module.exports = {
         extractComments: false,
         terserOptions: {
           output: {
-            ascii_only: true, 
+            ascii_only: true,
           },
         },
     })],
