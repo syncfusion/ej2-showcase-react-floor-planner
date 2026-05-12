@@ -1,4 +1,4 @@
-import { NodeConstraints, Node } from '@syncfusion/ej2-diagrams';
+import { NodeConstraints, Node, PortConstraints, PortVisibility } from '@syncfusion/ej2-diagrams';
 
 export class PaperSize {
     constructor() {
@@ -362,6 +362,213 @@ export class UtilityMethods {
           popupElement.style.left = `${bounds.left}px`;
           popupElement.style.top = `${bounds.top + 40}px`;
         }
+    }
+
+    // Creates a measurement label for a node's side (top, right, bottom, left).
+    createNodeLabels(node, useTemplate, isUnitVisible, unitSystem, pxPerUnit) {
+        const sides = ['top', 'right', 'bottom', 'left'];
+        return sides.map(side => {
+            // determine value to display based on side (width or height)
+            const value = Math.round((side === 'top' || side === 'bottom') ? node.width : node.height);
+            let offset, margin = {}, rotateAngle = 0;
+            if (side === 'top') { offset = { x: 0.5, y: 0 }; margin.bottom = 15; }
+            if (side === 'bottom') { offset = { x: 0.5, y: 1 }; margin.top = 15; }
+            if (side === 'left') { offset = { x: 0, y: 0.5 }; margin.right = 15; rotateAngle = 270 }
+            if (side === 'right') { offset = { x: 1, y: 0.5 }; margin.left = 15; rotateAngle = 270 }
+            return {
+                id: `_measure_room_${side}`,
+                ...(useTemplate
+                    ? {
+                        template: `<div class="measure-room" style="white-space:nowrap;display:inline-block"
+                        data-node-id="${node.id}" data-side="${side}">${value}</div>`
+                    }
+                    : {
+                        content: this.formatMeasurement(value, unitSystem, pxPerUnit)
+                    }),
+                offset,
+                margin,
+                rotateAngle,
+                width: 15, height: 15,
+                visibility: isUnitVisible,
+                style: { textWrapping: 'NoWrap' }
+            };
+        });
+    }
+
+    // Updates node labels while element draw
+    updateNodeSVGLabels(node, diagram, unitSystem, pxPerUnit) {
+        if (node.annotations.length > 0 && node.annotations[0].id.includes('_measure_room')) {
+            const width = Math.round(node.width);
+            const height = Math.round(node.height);
+            const entries = [
+                ['top', 0, width],
+                ['right', 1, height],
+                ['bottom', 2, width],
+                ['left', 3, height],
+            ];
+            const root = diagram.element;
+            const baseSelector = `.measure-room[data-node-id="${node.id}"]`;
+            for (const [side, idx, val] of entries) {
+                const annotation = node.annotations[idx];
+                const element = root.querySelector(`${baseSelector}[data-side="${side}"]`);
+                const text = this.formatMeasurement(val, unitSystem, pxPerUnit);
+                if (element && element.textContent !== text) {
+                    element.textContent = text;
+                    const rect = element.getBoundingClientRect();
+                    annotation.width = (side === 'top' || side === 'bottom') ? rect.width : rect.height;
+                    annotation.height = (side === 'top' || side === 'bottom') ? rect.height : rect.width;
+                }
+            }
+        }
+    }
+
+    // Updates node label while size change
+    updateNodeLabels(node, unitSystem, pxPerUnit) {
+        if (node.annotations.length > 0 && node.annotations[0].id.includes('_measure_room')) {
+            for (let i = 0; i < 4; i++) {
+                const annotation = node.annotations[i];
+                const side = ['top', 'right', 'bottom', 'left'][i];
+                const value = (side === 'top' || side === 'bottom') ? Math.round(node.width) : Math.round(node.height);
+                annotation.content = this.formatMeasurement(value, unitSystem, pxPerUnit);
+            }
+        }
+    }
+    /**
+     * Returns a minimal SVG wrapper for the connector (wall) label text.
+     * Used as the annotation template for wall measurements.
+     * @param connectorId The connector's id
+     */
+    getConnectorSVGLabel(connectorId) {
+        const ns = 'http://www.w3.org/2000/svg';
+        const svg = document.createElementNS(ns, 'svg');
+        svg.setAttribute('id', connectorId + '_dimension_svg');
+        svg.setAttribute('width', '37');
+        svg.setAttribute('height', '17');
+        svg.style.overflow = 'visible';
+        const text = document.createElementNS(ns, 'text');
+        text.setAttribute('id', connectorId + '_dimension_text');
+        text.setAttribute('x', '50%');
+        text.setAttribute('y', '50%');
+        text.setAttribute('text-anchor', 'middle');
+        text.setAttribute('dominant-baseline', 'middle');
+        text.textContent = '0"';
+        svg.appendChild(text);
+        const div = document.createElement('div');
+        div.style.pointerEvents = 'none';
+        div.className = "measure-wall";
+        div.setAttribute('data-connector-id', connectorId);
+        div.appendChild(svg);
+        return div;
+    }
+
+    // Updates connector label SVG text to show measured length while element draw
+    updateConnectorSVGLabel(connector, diagram, unitSystem, pxPerUnit) {
+        if (connector.annotations.length > 0 && this.isMeasureWall(connector)) {
+            const measuredValue = this.getConnectorLength(connector, unitSystem, pxPerUnit);
+            const textElement = diagram.element.querySelector(`.measure-wall[data-connector-id="${connector.id}"] svg text`);
+            if (textElement) {
+                textElement.textContent = measuredValue;
+            }
+        }
+    }
+
+
+    // Update connector annotation content while end point change
+    updateConnectorContent(connector, unitSystem, pxPerUnit) {
+        if (connector.annotations.length > 0 && this.isMeasureWall(connector)) {
+            connector.annotations[0].content = this.getConnectorLength(connector, unitSystem, pxPerUnit);
+        }
+    }
+
+    // Measure connector length
+    getConnectorLength(connector, unitSystem, pxPerUnit) {
+        const sp = connector.sourcePoint, tp = connector.targetPoint;
+        const len = Math.hypot(tp.x - sp.x, tp.y - sp.y);
+        return this.formatMeasurement(len, unitSystem, pxPerUnit);
+    }
+
+    // Collects all measurement annotation objects (for rooms and walls) in the diagram
+    getMeasuredAnnotations(diagram) {
+        const measuredAnnotations = [];
+        diagram.nodes.forEach((node) => {
+            node.annotations.filter((a) => a.id.includes('_measure_room'))
+                .forEach((annotation) => measuredAnnotations.push(annotation));
+        });
+        diagram.connectors.forEach((connector) => {
+            connector.annotations.filter((a) => a.id.includes('_measure_wall'))
+                .forEach((annotation) => measuredAnnotations.push(annotation));
+        });
+        return measuredAnnotations;
+    }
+
+    isMeasureRoom(node) {
+        return node.annotations.some(annotation => annotation.id.includes('_measure_room'));
+    };
+
+    isMeasureWall(connector) {
+        return connector.annotations.some(annotation => annotation.id.includes('_measure_wall'));
+    };
+
+
+    // Updates all measurement labels in diagram with the current unit system
+    updateAllMeasurements(diagram, unitSystem, pxPerUnit) {
+        diagram.nodes.forEach((node) => {
+            this.updateNodeLabels(node, unitSystem, pxPerUnit);
+        });
+        diagram.connectors.forEach((connector) => {
+            this.updateConnectorContent(connector, unitSystem, pxPerUnit);
+        });
+    }
+
+    /**
+     * Formats a raw pixel value as a measurement string for display.
+     * Supports 'Feet' (ft/in) and 'Meter' (m/cm) systems.
+     * @param px The value in pixels
+     * @param unitSystem The unit system ('Feet' or 'Meter')
+     * @param pxPerUnit The pixels per unit
+     */
+    formatMeasurement(px, unitSystem = 'Feet', pxPerUnit = 1) {
+        if (unitSystem === 'Feet') {
+            const totalInches = (px / pxPerUnit) * 12;
+            const feet = Math.floor(totalInches / 12);
+            const inches = Math.round(totalInches % 12);
+            if (feet === 0 && inches === 0) return `0"`;
+            if (feet === 0) return `${inches}"`;
+            if (inches === 0) return `${feet}'`;
+            return `${feet}' ${inches}"`;
+        } else {
+            const totalMeters = px / (pxPerUnit);
+            if (totalMeters < 0.01) return `0 cm`;
+            return `${totalMeters.toFixed(1)} m`;
+        }
+    }
+    
+    // End ports for wall connectors
+    getWallEndPorts() {
+        return [
+            {
+                id: 'left',
+                offset: 0,
+                horizontalAlignment: 'Center',
+                verticalAlignment: 'Center',
+                constraints: PortConstraints.Default | PortConstraints.Draw,
+                visibility: PortVisibility.Visible,
+                width: 5,
+                height: 5,
+                style: { fill: 'black', strokeWidth: 0 },
+            },
+            {
+                id: 'right',
+                offset: 1,
+                horizontalAlignment: 'Center',
+                verticalAlignment: 'Center',
+                constraints: PortConstraints.Default | PortConstraints.Draw,
+                visibility: PortVisibility.Visible,
+                width: 5,
+                height: 5,
+                style: { fill: 'black', strokeWidth: 0  },
+            },
+        ];
     }
 }
 

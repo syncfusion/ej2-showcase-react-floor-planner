@@ -333,3 +333,9 @@ textarea.e-input,
 .e-diagram-menu .e-order::before {
   content: '\e4a4';
 }
+.e-frame-1::before{
+  content: '\e8aa';
+}
+.e-scale::before{
+  content: '\e7c7'
+}

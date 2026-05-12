@@ -570,9 +570,13 @@ export class SelectorViewModel {
                                 break;
                               case 'width':
                                 node.width = this.nodeProperties.width.value;
+                                // Update all side labels to reflect new node size
+                                this.utilityMethods.updateNodeLabels(node, args.currentUnitSystem, args.currentPxPerUnit);
                                 break;
                               case 'height':
                                 node.height = this.nodeProperties.height.value;
+                                // Update all side labels to reflect new node size
+                                this.utilityMethods.updateNodeLabels(node, args.currentUnitSystem, args.currentPxPerUnit);
                                 break;
                               case 'rotateangle':
                                 node.rotateAngle = this.nodeProperties.rotateAngle.value;
@@ -634,9 +638,11 @@ export class SelectorViewModel {
                             connector.style.strokeColor = this.getColor(this.connectorProperties.lineColor.value);
                             connector.sourceDecorator.style = { fill: connector.style.strokeColor, strokeColor: connector.style.strokeColor };
                             connector.targetDecorator.style = { fill: connector.style.strokeColor, strokeColor: connector.style.strokeColor };
+                            connector.ports.forEach(port => port.style.fill = connector.style.strokeColor);
                             break;
                         case 'linewidth':
                             connector.style.strokeWidth = this.connectorProperties.lineWidth.value;
+                            connector.ports.forEach(port => port.width = port.height = connector.style.strokeWidth);
                             if (connector.sourceDecorator.style) {
                                 connector.sourceDecorator.style.strokeWidth = connector.style.strokeWidth;
                             }
@@ -672,6 +678,7 @@ export class SelectorViewModel {
                             connector.style.opacity = this.connectorProperties.opacity.value / 100;
                             connector.targetDecorator.style.opacity = connector.style.opacity;
                             connector.sourceDecorator.style.opacity = connector.style.opacity;
+                            connector.ports.forEach(port => port.style.opacity = connector.style.opacity);
                             document.getElementById('connectorOpacitySliderText').value = this.connectorProperties.opacity.value + '%';
                             break;
                         case 'linejump':

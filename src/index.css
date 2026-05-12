@@ -202,3 +202,36 @@ code {
     display: none;
   }
 }
+
+.draw-icon {
+  width: 12px; /* Adjust width as needed */
+  height: 12px; /* Adjust height as needed */
+  display: inline-block; /* Essential for the icon to be visible */
+  vertical-align: middle; /* Aligns with text if present */
+}
+
+.icon-wall {
+  background-image: url("../public/assets/dbstyle/common_images/wall.svg");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 12px 12px; /* Adjust size as needed */
+}
+
+.icon-room {
+  background-image: url("../public/assets/dbstyle/common_images/room.svg");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 12px 12px;
+}
+
+.e-btn-group .unit-btn + label,
+.e-btn-group .unit-btn + .e-btn {
+  text-transform: lowercase;
+}
+
+.e-btn-group .unit-btn:checked + label,
+.e-btn-group .unit-btn:checked + .e-btn {
+background-color: rgb(0, 96, 170) !important;
+color: #fff !important;
+border-color: rgb(0, 96, 170) !important;
+}

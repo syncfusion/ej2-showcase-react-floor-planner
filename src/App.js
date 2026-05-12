@@ -28,6 +28,12 @@ export let beforeClose;
 export let menuclick;
 export let menuclick1;
 export let tooledit;
+let handToolTemplate;
+let handToolChange;
+let drawToolTemplate;
+let drawToolChange;
+let unitVisibleChange;
+let unitMetricChange;
 export let zoomTemplate;
 export let zoomchange;
 export let connectorToolChange;
@@ -1556,6 +1562,9 @@ class App extends React.Component {
       ]
     }
     ];
+    this.currentUnitSystem = 'Feet';  // Measurement unit system ('Feet' or 'Meter')
+    this.currentPxPerUnit = 10;        // Number of pixels per unit (for scaling)
+    this.isUnitVisible = true;        // Controls visibility of measurement labels
     this.extensionType = '.csv';
     this.selectedItem = new SelectorViewModel();
     this.dropDownDataSources = new DropDownDataSources();
@@ -1589,7 +1598,13 @@ class App extends React.Component {
     menuclick = this.menuClick.bind(this);
     menuclick1 = this.menuClick1.bind(this);
     tooledit = this.toolbarEditorClick.bind(this);
-    propertyPanel = this.propertyPanel.bind(this)
+    propertyPanel = this.propertyPanel.bind(this);
+    handToolTemplate = this.handToolTemplate.bind(this);
+    handToolChange = this.handToolChange.bind(this);
+    drawToolTemplate = this.drawToolTemplate.bind(this);
+    drawToolChange = this.drawToolChange.bind(this);
+    unitVisibleChange = this.unitVisibleChange.bind(this);
+    unitMetricChange = this.unitMetricChange.bind(this);
     zoomTemplate = this.zoomTemplate.bind(this);
     zoomchange = this.zoomChange.bind(this);
     offsetXChange = this.offsetX.bind(this);
@@ -1672,9 +1687,8 @@ render() {
                     <ItemDirective prefixIcon='sf-icon-undo tb-icons' disabled = {true} tooltipText='Undo' cssClass='tb-item-start tb-item-undo' />
                     <ItemDirective prefixIcon='sf-icon-redo tb-icons' disabled = {true} tooltipText='Redo' cssClass='tb-item-end tb-item-redo' />
                     <ItemDirective type="Separator" />
-                    <ItemDirective prefixIcon='sf-icon-pan' tooltipText='Pan Tool' cssClass='tb-item-start pan-item' />
-                    <ItemDirective prefixIcon='sf-icon-pointer' tooltipText='Select Tool' cssClass='tb-item-middle tb-item-selected' />
-                    <ItemDirective prefixIcon='sf-icon-straight_line' tooltipText='Straight' cssClass='tb-item-middle' />
+                    <ItemDirective cssClass='tb-item-start' template={handToolTemplate} />
+                    <ItemDirective cssClass='tb-item-middele' tooltipText='Draw Rooms / Walls' template={drawToolTemplate} />
                     <ItemDirective prefixIcon='sf-icon-text' tooltipText='Text Tool' cssClass='tb-item-end' />
                     <ItemDirective prefixIcon='sf-icon-group' tooltipText='Group' visible={false} align='Center' cssClass='tb-item-start tb-item-align-category' />
                     <ItemDirective type="Separator" visible={false} align='Center' />
@@ -1707,7 +1721,7 @@ render() {
             </div>
           </div>
           <div className='row content'>
-            <div className='sidebar show-overview'>
+            <div className='sidebar'>
               <div className='db-palette-parent'>
                 <SymbolPaletteComponent
                   id="symbolpalette"
@@ -1739,17 +1753,20 @@ render() {
                     nodes={this.nodes}
                     connectors={this.connectors}
                     getNodeDefaults={this.setNodeDefaults}
-                    getConnectorDefaults={this.setConnectorDefaults}
+                    getConnectorDefaults={this.getConnectorDefaults.bind(this)}
                     created={this.created.bind(this)}
                     commandManager={{commands:this.getCommands()}}
                     selectionChange={this.diagramEvents.selectionChange.bind(this.diagramEvents)}
                     positionChange={this.diagramEvents.nodePositionChange.bind(this.diagramEvents)}
-                    sizeChange={this.diagramEvents.nodeSizeChange.bind(this.diagramEvents)}
+                    sizeChange={this.diagramEvents.nodeSizeChange.bind(this)}
                     rotateChange={this.diagramEvents.nodeRotationChange.bind(this.diagramEvents)}
+                    elementDraw={this.diagramEvents.elementDraw.bind(this)}
                     dragEnter={this.diagramEvents.dragEnter.bind(this.diagramEvents)}
                     historyChange={this.diagramEvents.historyChange.bind(this.diagramEvents)}
                     scrollChange={this.scrollChange.bind(this)}
                     collectionChange={this.diagramEvents.collectionChange.bind(this.diagramEvents)}
+                    sourcePointChange={this.diagramEvents.sourcePointChange.bind(this)}
+                    targetPointChange={this.diagramEvents.targetPointChange.bind(this)}
                     contextMenuClick={this.contextMenuClick.bind(this)}
                     contextMenuOpen={this.contextMenuOpen.bind(this)}
                     contextMenuSettings={{ show: true, items: [{ text: 'Paste', id: 'pasteObj', target: '.e-elementcontent', iconCss: 'e-icons e-paste',}]}}
@@ -1761,30 +1778,56 @@ render() {
                   <div id='diagramPropertyContainer' className='db-diagram-prop-container'>
                     <div className='row db-prop-header-text'>
                       Diagram
-                      <ButtonComponent className='close' onClick={propertyPanel} style={{ opacity:1 }}>
+                      <ButtonComponent className='close' onClick={propertyPanel} style={{ opacity: 1 }}>
                         <i style={{ width: '20px', height: '20px', fontSize: '20px' }} className='sf-icon-close'></i>
                       </ButtonComponent>
                     </div>
-                    
-                    <div className='col-xs-6 db-col-left' style={{ marginTop: '10px' }}>
-                      <CheckBoxComponent id="showRulers" label="Show Rulers" ref={showRulers => this.showRulers = showRulers}
-                        checked={true}
-                        change={this.diagramPropertyBinding.diagramPropertiesChange.bind(this)} />
-                    </div>
-                    <div className='col-xs-6 db-col-right' style={{ marginTop: '10px' }}>
-                      <CheckBoxComponent id="showGrid" label="Show Grid" ref={showGrid => this.showGrid = showGrid}
-                        checked={true}
-                        change={this.diagramPropertyBinding.diagramPropertiesChange.bind(this)} />
-                    </div>
-                    <div className='col-xs-6 db-col-left' style={{ marginTop: '10px' }}>
-                      <CheckBoxComponent id="snapToGrid" label="Snap To Grid" ref={snapToGrid => this.snapToGrid = snapToGrid}
-                        checked={false}
-                        change={this.diagramPropertyBinding.diagramPropertiesChange.bind(this)} />
-                    </div>
-                    <div className='col-xs-6 db-col-right' style={{ marginTop: '10px' }}>
-                      <CheckBoxComponent id="showGuides" label="Show Guides" ref={showGuides => this.showGuides = showGuides}
-                        checked={true}
-                        change={this.diagramPropertyBinding.diagramPropertiesChange.bind(this)} />
+
+                    {/* General Settings Section */}
+                    <div id='generalDiagramSettings' style={{ paddingBottom: '20px', borderBottom: '1px solid #e0e0e0' }}>
+                      <div className='row db-prop-header-text' style={{ marginBottom: '15px', marginTop: '15px' }}>
+                        <span className='db-prop-text-style' style={{ fontWeight: '600', fontSize: '14px' }}>General Settings</span>
+                      </div>
+
+                      <div className='col-xs-12 db-col-left' style={{ marginBottom: '12px' }}>
+                        <CheckBoxComponent 
+                          id="showRulers" 
+                          label="Show Rulers" 
+                          ref={showRulers => this.showRulers = showRulers}
+                          checked={true}
+                          change={this.diagramPropertyBinding.diagramPropertiesChange.bind(this)} 
+                        />
+                      </div>
+
+                      <div className='col-xs-12 db-col-left' style={{ marginBottom: '12px' }}>
+                        <CheckBoxComponent 
+                          id="showGrid" 
+                          label="Show grid" 
+                          ref={showGrid => this.showGrid = showGrid}
+                          checked={true}
+                          change={this.diagramPropertyBinding.diagramPropertiesChange.bind(this)} 
+                        />
+                      </div>
+
+                      <div className='col-xs-12 db-col-left' style={{ marginBottom: '12px' }}>
+                        <CheckBoxComponent 
+                          id="snapToGrid" 
+                          label="Snap to grid" 
+                          ref={snapToGrid => this.snapToGrid = snapToGrid}
+                          checked={false}
+                          change={this.diagramPropertyBinding.diagramPropertiesChange.bind(this)} 
+                        />
+                      </div>
+
+                      <div className='col-xs-12 db-col-left' style={{ marginBottom: '12px' }}>
+                        <CheckBoxComponent 
+                          id="showGuides" 
+                          label="Show Guides" 
+                          ref={showGuides => this.showGuides = showGuides}
+                          checked={true}
+                          change={this.diagramPropertyBinding.diagramPropertiesChange.bind(this)} 
+                        />
+                      </div>
                     </div>
                     {/* <div className='db-prop-separator' style={{ backgroundColor: '#b5b5b5', marginBottom: '10px' }}></div>
                     <div className='row db-prop-row'>
@@ -1878,6 +1921,43 @@ render() {
                         checked={this.selectedItem.pageSettings.pageBreaks}
                         change={this.diagramPropertyBinding.pageBreaksChange.bind(this.diagramPropertyBinding)} />
                     </div> */}
+
+                    {/* Unit Settings Section */}
+                    <div id='unitSettingsContainer' style={{ paddingTop: '20px' }}>
+                      <div className='row db-prop-header-text' style={{ marginBottom: '15px' }}>
+                        <span className='db-prop-text-style' style={{ fontWeight: '600', fontSize: '14px' }}>Unit Settings</span>
+                      </div>
+
+                      <div className='col-xs-7 db-col-left'>
+                        <CheckBoxComponent 
+                          id="showUnit" 
+                          label="Show unit" 
+                          checked={this.isUnitVisible}
+                          change={unitVisibleChange} 
+                        />
+                      </div>
+                      <div className='col-xs-5 db-col-right'>
+                        <div className='e-btn-group'>
+                          <input className="unit-btn"
+                            type="radio"
+                            id="unitFeet"
+                            value="Feet"
+                            name="unit"
+                            onChange={() => this.unitMetricChange('Feet')}
+                          />
+                          <label className="e-btn" htmlFor="unitFeet" title="feet">ft</label>
+
+                          <input className="unit-btn"
+                            type="radio"
+                            id="unitMeter"
+                            value="Meter"
+                            name="unit"
+                            onChange={() => this.unitMetricChange('Meter')}
+                          />
+                          <label className="e-btn" htmlFor="unitMeter" title="meter">m</label>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                   <div id='nodePropertyContainer' className='db-node-prop-container' style={{ display: 'none' }}>
                     <div className='db-node-behaviour-prop' id="dimen">
@@ -2548,6 +2628,99 @@ render() {
   return shortCutKey;
 }
 
+  // Renders the DropDown template for the hand tool
+  handToolTemplate() {
+    return (<div id="handtool_template_toolbar">
+      <DropDownButtonComponent
+        id="handTool"
+        items={this.dropDownDataSources.handItems}
+        iconCss={(this.selectedItem.selectedDiagram && ((this.selectedItem.selectedDiagram.tool & DiagramTools.ZoomPan) === DiagramTools.ZoomPan)) ? "sf-icon-pan" : "sf-icon-pointer" }
+        select={handToolChange}
+      />
+    </div>);
+  }
+
+  handToolChange(args) {
+    const btn = document.getElementById('handTool').ej2_instances[0];
+
+    const selectedTool = args.item.value;
+    const diagram = this.selectedItem.selectedDiagram;
+    diagram.clearSelection();
+    if (selectedTool === 'Pan') {
+      btn.iconCss = 'sf-icon-pan';
+      diagram.tool = DiagramTools.ZoomPan;
+    }
+    else if (selectedTool === 'Select') {
+      btn.iconCss = 'sf-icon-pointer';
+      diagram.drawingObject = {};
+      diagram.tool = DiagramTools.SingleSelect | DiagramTools.MultipleSelect;
+    }
+    // remove Text tool button selection
+    const toolbarEditor = document.getElementById("toolbarEditor").ej2_instances[0];
+    this.UtilityMethods.removeSelectedToolbarItem();
+    toolbarEditor.dataBind();
+  }
+
+    // Renders the DropDown template for the draw tool
+  drawToolTemplate() {
+    return (<div id="drawtool_template_toolbar">
+      <DropDownButtonComponent
+        id="drawTool"
+        items={this.dropDownDataSources.drawItems}
+        iconCss={(this.selectedItem.selectedDiagram && this.selectedItem.selectedDiagram.drawingObject &&
+          this.selectedItem.selectedDiagram.drawingObject.shape && this.selectedItem.selectedDiagram.drawingObject.shape.type === 'Basic') ?
+          "icon-room draw-icon" : "icon-wall draw-icon"}
+        select={drawToolChange}
+      />
+    </div>);
+  }
+
+  drawToolChange(args) {
+    const btn = document.getElementById('drawTool').ej2_instances[0];
+
+    const selectedTool = args.item.value;
+    const diagram = this.selectedItem.selectedDiagram;
+    diagram.clearSelection();
+    if (selectedTool === 'Draw Wall') {
+      btn.iconCss = 'icon-wall draw-icon';
+      diagram.drawingObject = {
+        type: 'Straight',
+        targetDecorator: { shape: 'None' },
+        style: { strokeWidth: 5 },
+        ports: this.UtilityMethods.getWallEndPorts()
+      };
+      diagram.tool = DiagramTools.ContinuousDraw;
+    }
+    else if (selectedTool === 'Draw Room') {
+      btn.iconCss = 'icon-room draw-icon';
+      diagram.drawingObject = {
+        shape: { type: 'Basic', shape: 'Rectangle' },
+        style: { strokeWidth: 5 }
+      };
+      diagram.tool = DiagramTools.ContinuousDraw;
+    }
+    // remove Text tool button selection
+    const toolbarEditor = document.getElementById("toolbarEditor").ej2_instances[0];
+    this.UtilityMethods.removeSelectedToolbarItem();
+    toolbarEditor.dataBind();
+  }
+
+  // Handle Changes in value of unit visible in toolbar
+  unitVisibleChange(args) {
+    const visible = this.isUnitVisible = args.checked;
+    // get room & wall measurement annotations
+    const annotations = this.UtilityMethods.getMeasuredAnnotations(this.selectedItem.selectedDiagram);
+    annotations.forEach(annot => annot.visibility = visible);
+  }
+
+  // Handle Unit Metric Change
+  unitMetricChange(unit) {
+    this.currentUnitSystem = unit;
+    // Update all node labels and connector labels
+    this.UtilityMethods.updateAllMeasurements(this.selectedItem.selectedDiagram, this.currentUnitSystem, this.currentPxPerUnit);
+    this.selectedItem.selectedDiagram.dataBind();
+  }
+
   // Renders the DropDown template for the zoom toolbar
   zoomTemplate() {
     return (<div id="template_toolbar">
@@ -2640,14 +2813,14 @@ render() {
   nodeWidth(args) {
     if (args.isInteracted) {
       this.selectedItem.nodeProperties.width.value = args.value;
-      this.selectedItem.nodePropertyChange({ propertyName: 'width', propertyValue: args });
+      this.selectedItem.nodePropertyChange({ propertyName: 'width', propertyValue: args, currentUnitSystem: this.currentUnitSystem, currentPxPerUnit: this.currentPxPerUnit });
     }
   }
   //function to handle changes in the height of a node property
   nodeHeight(args) {
     if (args.isInteracted) {
       this.selectedItem.nodeProperties.height.value = args.value;
-      this.selectedItem.nodePropertyChange({ propertyName: 'height', propertyValue: args });
+      this.selectedItem.nodePropertyChange({ propertyName: 'height', propertyValue: args, currentUnitSystem: this.currentUnitSystem, currentPxPerUnit: this.currentPxPerUnit });
     }
   }
   //set the aspect ratio constraints to the node
@@ -3171,15 +3344,6 @@ render() {
           case 'bringforward':
               diagram.moveForward();
               break;
-          case 'pantool':
-              diagram.clearSelection();
-              diagram.tool = DiagramTools.ZoomPan;
-              break;
-          case 'selecttool':
-              diagram.clearSelection();
-              diagram.drawingObject = {};
-              diagram.tool = DiagramTools.SingleSelect | DiagramTools.MultipleSelect;
-              break;
           case 'group':
               diagram.group();
               args.item.prefixIcon = 'sf-icon-ungroup';
@@ -3223,10 +3387,6 @@ render() {
                 diagram.drawingObject = { shape: { type: 'Text' }, style: { strokeColor: 'none', fill: 'none' } };
                 diagram.tool = DiagramTools.ContinuousDraw;
                 break;
-          case 'straight' : 
-                diagram.drawingObject = { type: 'Straight' ,targetDecorator:{ shape: "none"}} ;
-                diagram.tool = DiagramTools.ContinuousDraw;
-                break;
           case 'orthogonal' : 
                 diagram.drawingObject = { type: 'Orthogonal' } ;
                 diagram.tool = DiagramTools.ContinuousDraw;
@@ -3236,14 +3396,14 @@ render() {
                 diagram.tool = DiagramTools.ContinuousDraw;
                 break;
           default:
-                break;
+            break;
      }
-     if (commandType === 'pantool' || commandType === 'selecttool' || commandType === 'texttool'|| commandType === 'straight') {
+     if (commandType === 'texttool') {
       if (args.item.cssClass.indexOf('tb-item-selected') === -1) {
         this.UtilityMethods.removeSelectedToolbarItem();
           args.item.cssClass += ' tb-item-selected';
       }
-  }
+    }
   }
 
   //To rename the title of the Diagram
@@ -3336,6 +3496,7 @@ render() {
   loadPage() {
     document.getElementsByClassName('diagrambuilder-container')[0].style.display = '';
     this.selectedItem.selectedDiagram.updateViewPort();
+    document.getElementById('unitFeet').checked = true;
     this.selectedItem.nodeProperties.offsetX = this.nodeOffsetX;
     this.selectedItem.nodeProperties.offsetY = this.nodeOffsetY;
     this.selectedItem.nodeProperties.width = this.width;
@@ -3415,7 +3576,7 @@ render() {
   created() {
     diagramInstance = document.getElementById("diagram").ej2_instances[0];
     let diagram = this.selectedItem.selectedDiagram;
-    // diagram.fitToPage({ mode: 'Page', region: 'Content' });
+    diagram.fitToPage({ mode: 'Page', region: 'Content' });
   }
 
   // Function to handle changes in the scroll state and update the zoom content when scrolling in the diagram.
@@ -3485,17 +3646,9 @@ render() {
 
   // Function to define default properties for a connector in the diagram.
   getConnectorDefaults(connector) {
-    let connector1 = {
-        annotations: [
-          { content: "", style: { fill: "transparent" } }
-        ],
-        style: { strokeWidth: 2 }
-    };
-    return connector1;
-
+    connector.type = 'Straight';
+    connector.targetDecorator = { shape: 'None' };
   }
-
-
 }
 
 const Footer = () => (
