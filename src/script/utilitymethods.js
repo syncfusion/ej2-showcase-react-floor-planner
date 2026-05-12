@@ -1,5 +1,4 @@
 import { NodeConstraints, Node, PortConstraints, PortVisibility } from '@syncfusion/ej2-diagrams';
-import { Ajax } from '@syncfusion/ej2-base';
 
 export class PaperSize {
     constructor() {
@@ -15,20 +14,6 @@ export class UtilityMethods {
         this.tempDialog = undefined;
         this.toolbarEditor = undefined;
     }
-
-    residentialImage = [
-        { source: 'assets/dbstyle/common_images/blank_diagram.svg', name: 'Blank Diagram', type: 'svg_blank' },
-        { source: 'assets/dbstyle/residential/2BHK.png', name: 'Modern 2BHK Efficient Family Layout' },
-        { source: 'assets/dbstyle/residential/studio_apartment.png', name: 'Studio Apartment Smart‑Space Open Layout' },
-        { source: 'assets/dbstyle/residential/3BHK.png', name: 'Spacious 3BHK Layout' },
-    ];
-
-    commercialImage = [
-        { source: 'assets/dbstyle/common_images/blank_diagram.svg', name: 'Blank Diagram', type: 'svg_blank' },
-        { source: 'assets/dbstyle/commercial/office_space.png', name: 'Open‑Plan Modern Office Layout' },
-        { source: 'assets/dbstyle/commercial/boutique_store.png', name: 'Boutique Retail Store Floor Plan' },
-        { source: 'assets/dbstyle/commercial/restaurant.png', name: 'Restaurant With Dining Plan' },
-    ];
 
     // Binds node properties to the selected item
     bindNodeProperties(node, selectedItem, isMultiSelect) {
@@ -585,140 +570,5 @@ export class UtilityMethods {
             },
         ];
     }
-
-    getDefaultDiagramTemplates1(selectedItem, tempCount, backgroundColor, parentId) {
-        let i;
-        let j;
-        tempCount = tempCount ? tempCount : 4;
-        backgroundColor = backgroundColor ? backgroundColor : 'red';
-        parentId = parentId ? parentId : 'Residential';
-        let parentDiv = document.getElementById('diagramTemplateDiv1');
-        parentDiv = parentDiv.cloneNode(true);
-        parentDiv.id = '';
-        parentDiv.style.display = '';
-        const parentElements = parentDiv.getElementsByClassName('db-diagram-template-parent-text');
-
-        for (i = 0; i < parentElements.length; i++) {
-            if (parentElements[i].children[0].innerHTML.trim() === parentId) {
-                parentElements[i].classList.add('active');
-            }
-        }
-        const diagramTemplatesDiv = parentDiv.getElementsByClassName('diagramTemplates')[0];
-        diagramTemplatesDiv.appendChild(this.generateDiagramTemplates(tempCount, backgroundColor, parentId, selectedItem));
-        this.tempDialog.content = parentDiv.outerHTML;
-        this.tempDialog.dataBind();
-        this.triggerTemplateEvent(selectedItem);
-        return this.tempDialog.content;
-    }
-
-    showDiagramTemplates(selectedItem, evt) {
-        let target = evt.target;
-        if (target.tagName.toLowerCase() === 'span') {
-            target = target.parentElement;
-        }
-        switch (target.children[0].innerHTML.trim()) {
-            case 'Residential':
-                this.getDefaultDiagramTemplates1(selectedItem, 4, 'red', 'Residential');
-                break;
-            case 'Commercial':
-                this.getDefaultDiagramTemplates1(selectedItem, 4, 'blue', 'Commercial');
-                break;
-        }
-    }
-
-    generateDiagramTemplates(tempCount, backgroundColor, parentId, selectedItem) {
-        const parentTemplateDiv = document.createElement('div');
-        parentTemplateDiv.classList.add('class', 'db-parent-diagram-template');
-
-        const divElement = document.getElementById('diagramTemplateDiv');
-        for (let i = 0; i < tempCount; i++) {
-            const cloneTemplateDiv = divElement.cloneNode(true);
-            cloneTemplateDiv.style.display = '';
-            cloneTemplateDiv.id = '';
-            const imageDiv = cloneTemplateDiv.children[0];
-
-            imageDiv.setAttribute('id', parentId.replace(' ', '').toLowerCase() + '_child' + i);
-            const diagramType = this.getImageSource(parentId, i);
-            (imageDiv.children[0]).style.backgroundImage = 'url(' + diagramType.source + ')';
-            if (diagramType.type) {
-                if (diagramType.type === 'svg_blank') {
-                    (imageDiv.children[0]).className = 'db-diagram-template-svg-blank-image';
-                } else {
-                    (imageDiv.children[0]).className = 'db-diagram-template-svg-image';
-                }
-            } else {
-                (imageDiv.children[0]).className = 'db-diagram-template-image';
-            }
-            cloneTemplateDiv.children[1].children[0].innerHTML = diagramType.name;
-            parentTemplateDiv.appendChild(cloneTemplateDiv);
-        }
-        return parentTemplateDiv;
-    }
-
-    triggerTemplateEvent(selectedItem) {
-        let i;
-        const parentElements = document.getElementsByClassName('db-diagram-template-parent-text');
-        for (i = 0; i < parentElements.length; i++) {
-            parentElements[i].onclick = this.showDiagramTemplates.bind(this, selectedItem);
-        }
-        const parentElements1 = document.getElementsByClassName('db-diagram-template-image-div');
-        for (i = 0; i < parentElements1.length; i++) {
-            parentElements1[i].onclick = this.generateDiagram.bind(this, selectedItem);
-        }
-    }
-
-    getImageSource(diagramType, index) {
-        switch (diagramType) {
-            case 'Residential':
-                return this.residentialImage[index];
-            case 'Commercial':
-                return this.commercialImage[index];
-            default:
-                return this.residentialImage[index];
-        }
-    }
-    generateDiagram(selectedItem, evt) {
-        const target = evt.target;
-        if (target.id.startsWith('residential')) {
-            if (target.id === 'residential_child1') {
-                this.readTextFile('assets/dbstyle/residential/2BHK.json', selectedItem);
-            }
-            else if (target.id === 'residential_child2') {
-                this.readTextFile('assets/dbstyle/residential/Studio_Apartment.json', selectedItem);
-            }
-            else if (target.id === 'residential_child3') {
-                this.readTextFile('assets/dbstyle/residential/3BHK.json', selectedItem);
-            }
-        }
-        else if (target.id.startsWith('commercial')) {
-            if (target.id === 'commercial_child1') {
-                this.readTextFile('assets/dbstyle/commercial/Office_Space.json', selectedItem);
-            }
-            else if (target.id === 'commercial_child2') {
-                this.readTextFile('assets/dbstyle/commercial/Boutique_Store.json', selectedItem);
-            }
-            else if (target.id === 'commercial_child3') {
-                this.readTextFile('assets/dbstyle/commercial/Restaurant.json', selectedItem);
-            }
-        }
-        const diagramName = target.parentElement.children[1].children[0].innerHTML;
-        if (diagramName !== 'Blank Diagram') {
-            document.getElementById('diagramName').innerHTML = diagramName;
-        }
-        this.tempDialog.hide();
-    }
-
-    readTextFile(file, selectedItem) {
-        const ajax = new Ajax(file, 'GET', true);
-        ajax.send().then();
-        ajax.onSuccess = (data) => {
-            selectedItem.preventSelectionChange = true;
-            let diagram = document.getElementById('diagram').ej2_instances[0];
-            diagram.loadDiagram(data);
-            diagram.fitToPage({ mode: 'Page', region: 'Content' });
-            selectedItem.preventSelectionChange = false;
-        };
-    }
-
 }
 
