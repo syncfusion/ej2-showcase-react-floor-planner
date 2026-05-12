@@ -33,6 +33,22 @@ constructor() {
       { text: "Verdana", value: "Verdana" }
     ];
 
+    this.handItems = [
+      { text: "Select", value: "Select", iconCss: "sf-icon-pointer" },
+      { text: "Pan", value: "Pan", iconCss: "sf-icon-pan" },
+    ];
+
+    this.drawItems = [
+      { text: "Draw Wall", value: "Draw Wall", iconCss: 'icon-wall' },
+      { text: "Draw Room", value: "Draw Room", iconCss: 'icon-room' },
+    ];
+
+    // Array defining various units of measurement
+    this.unitItems = [
+      { text: "Feet (ft)", value: "Feet" },
+      { text: "Meters (m)", value: "Meters" },
+    ];
+
     // Array defining various zoom levels and options for fitting the screen
     this.zoomMenuItems = [
         { text: 'Zoom In' },

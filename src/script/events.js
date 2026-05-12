@@ -31,8 +31,8 @@ export class DiagramClientSideEvents {
                 insertImageDiv.style.pointerEvents = 'none';
             }
             else if (insertImageDiv) {
-               insertImageDiv.style.opacity = 1;
-               insertImageDiv.style.pointerEvents = 'all';
+                insertImageDiv.style.opacity = 1;
+                insertImageDiv.style.pointerEvents = 'all';
             }
             selectedItems = selectedItems.concat(diagram.selectedItems.connectors);
             this.selectedItem.utilityMethods.enableToolbarItems(selectedItems);
@@ -43,15 +43,15 @@ export class DiagramClientSideEvents {
 
             if (selectedItems.length > 1) {
                 this.multipleSelectionSettings(selectedItems);
-                toolbarEditor.items[7].tooltipText = 'Group';
-                toolbarEditor.items[7].prefixIcon = 'sf-icon-group';
-                for (var i = 7; i <= 28; i++) {
+                toolbarEditor.items[6].tooltipText = 'Group';
+                toolbarEditor.items[6].prefixIcon = 'sf-icon-group';
+                for (var i = 6; i <= 27; i++) {
                     toolbarEditor.items[i].visible = true;
                 }
             } else if (selectedItems.length === 1) {
                 this.singleSelectionSettings(selectedItems[0]);
-                for (var j = 7; j <= 28; j++) {
-                    if(j<=16)
+                for (var j = 6; j <= 27; j++) {
+                    if(j<=15)
                     {
                         toolbarEditor.items[j].visible = false;
                     }
@@ -61,13 +61,13 @@ export class DiagramClientSideEvents {
                     }
                 }
                 if (selectedItems[0].children && selectedItems[0].children.length > 0) {
-                    toolbarEditor.items[7].tooltipText = 'UnGroup';
-                    toolbarEditor.items[7].prefixIcon = 'sf-icon-ungroup';
-                    toolbarEditor.items[7].visible = true;
+                    toolbarEditor.items[6].tooltipText = 'UnGroup';
+                    toolbarEditor.items[6].prefixIcon = 'sf-icon-ungroup';
+                    toolbarEditor.items[6].visible = true;
                 }
             } else {
                 this.selectedItem.utilityMethods.objectTypeChange("diagram");
-                for (var k = 7; k <= 27; k++) {
+                for (var k = 6; k <= 26; k++) {
                     toolbarEditor.items[k].visible = false;
                 }
             }
@@ -80,13 +80,28 @@ export class DiagramClientSideEvents {
         let showConnectorPanel = false, showNodePanel = false;
         let showTextPanel = false, showConTextPanel = false;
         let nodeContainer = document.getElementById("nodePropertyContainer");
+        let hasMeasureWall = false, hasMeasureRoom = false;
         selectedItems.forEach(object => {
-            if (object instanceof Node && (!showNodePanel || !showTextPanel)) {
-                showNodePanel = true;
-                showTextPanel = object.annotations.length > 0 && object.annotations[0].content ? true : false;
-            } else if (object instanceof Connector && (!showConnectorPanel || !showConTextPanel)) {
-                showConnectorPanel = true;
-                showConTextPanel = object.annotations.length > 0 && object.annotations[0].content ? true : false;
+            if (object instanceof Node) {
+                if (!showNodePanel) { showNodePanel = true; }
+                if (this.selectedItem.utilityMethods.isMeasureRoom(object)) {
+                    hasMeasureWall = true;
+                    showTextPanel = false;
+                } else {
+                    if (!hasMeasureWall) {
+                        showTextPanel = showTextPanel || object.annotations.length > 0 && object.annotations[0].content ? true : false;
+                    }
+                }
+            } else if (object instanceof Connector) {
+                if (!showConnectorPanel) { showConnectorPanel = true; }
+                if (this.selectedItem.utilityMethods.isMeasureWall(object)) {
+                    hasMeasureRoom = true;
+                    showConTextPanel = false;
+                } else {
+                    if (!hasMeasureRoom) {
+                        showConTextPanel = showConTextPanel || object.annotations.length > 0 && object.annotations[0].content ? true : false;
+                    }
+                }
             }
         });
 
@@ -177,7 +192,9 @@ export class DiagramClientSideEvents {
                 opacitySlider.style.visibility = 'hidden';
             }
             this.selectedItem.utilityMethods.bindTextProperties(object.style, this.selectedItem);
-        } else if (object.annotations.length > 0 && object.annotations[0].content) {
+        } 
+        else if (object.annotations.length > 0 && object.annotations[0].content &&
+            !(this.selectedItem.utilityMethods.isMeasureWall(object) || this.selectedItem.utilityMethods.isMeasureRoom(object))) {
             let el = document.getElementById("textPropertyContainer");
             el.style.display = "";
             document.getElementById("toolbarTextAlignmentDiv").style.display = "";
@@ -221,6 +238,10 @@ export class DiagramClientSideEvents {
         this.selectedItem.preventPropertyChange = true;
         this.selectedItem.nodeProperties.width.value = Math.round(args.newValue.width * 100) / 100;
         this.selectedItem.nodeProperties.height.value = Math.round(args.newValue.height * 100) / 100;
+        // Update all side labels to reflect new node size
+        const node = args.source.nodes[0];
+        this.selectedItem.utilityMethods.updateNodeLabels(node, this.currentUnitSystem, this.currentPxPerUnit);
+        
         if (args.state === "Completed") {
             this.selectedItem.isModified = true;
             this.selectedItem.preventPropertyChange = false;
@@ -242,6 +263,73 @@ export class DiagramClientSideEvents {
         if (args.state === 'Changed') {
             this.selectedItem.isModified = true;
         }
+    }
+
+    // Handles drawing of new elements (nodes/rooms and connectors/walls)
+    elementDraw(args) {
+        if (args.state === 'Start' || !args.source) return;
+        const diagram = this.selectedItem.selectedDiagram;
+        if (args.state === 'Progress') {
+            if (args.objectType === "Node") {
+                const node = args.source;
+                if (node.annotations.length === 0) {
+                    diagram.addLabels(node, this.selectedItem.utilityMethods.createNodeLabels(node, true, this.isUnitVisible, this.currentUnitSystem, this.currentPxPerUnit));
+                } else {
+                    this.selectedItem.utilityMethods.updateNodeSVGLabels(node, diagram, this.currentUnitSystem, this.currentPxPerUnit);
+                }
+            }
+            if (args.objectType === "Connector") {
+                const connector = args.source;
+                if (connector.annotations.length === 0) {
+                    connector.style.strokeWidth = 5;
+                    connector.ports = this.UtilityMethods.getWallEndPorts();
+                    diagram.addLabels(connector, [
+                        {
+                            id: '_measure_wall',
+                            width: 37, height: 17,
+                            alignment: 'Before',
+                            displacement: { x: 5, y: 5 },
+                            offset: 0.5, segmentAngle: true,
+                            template: this.selectedItem.utilityMethods.getConnectorSVGLabel(connector.id),
+                            visibility: this.isUnitVisible
+                        }
+                    ]);
+                } else {
+                    this.selectedItem.utilityMethods.updateConnectorSVGLabel(connector, diagram, this.currentUnitSystem, this.currentPxPerUnit);
+                }
+            }
+        } else if (args.state === 'Completed') {
+            diagram.removeLabels(args.source, args.source.annotations);
+            if (args.objectType === "Node") {
+                const node = args.source;
+                diagram.addLabels(node, this.selectedItem.utilityMethods.createNodeLabels(node, false, this.isUnitVisible, this.currentUnitSystem, this.currentPxPerUnit));
+            }
+            if (args.objectType === "Connector") {
+                const connector = args.source;
+                diagram.addLabels(connector, [
+                    {
+                        id: '_measure_wall',
+                        width: 37, height: 17,
+                        alignment: 'Before',
+                        displacement: { x: 5, y: 5 },
+                        offset: 0.5, segmentAngle: true,
+                        content: this.selectedItem.utilityMethods.getConnectorLength(connector, this.currentUnitSystem, this.currentPxPerUnit),
+                        visibility: this.isUnitVisible,
+                        style: { textWrapping: 'NoWrap' }
+                    }
+                ]);
+            }
+        }
+    }
+
+    // Update wall measurement when source endpoint moves
+    sourcePointChange(args) {
+        this.selectedItem.utilityMethods.updateConnectorContent(args.connector, this.currentUnitSystem, this.currentPxPerUnit);
+    }
+    
+    // Update wall measurement when target endpoint moves
+    targetPointChange(args) {
+        this.selectedItem.utilityMethods.updateConnectorContent(args.connector, this.currentUnitSystem, this.currentPxPerUnit);
     }
 
     // Adjusts size parameters of elements when they are dragged into the diagram
