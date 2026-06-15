@@ -282,7 +282,7 @@ export class DiagramClientSideEvents {
                 const connector = args.source;
                 if (connector.annotations.length === 0) {
                     connector.style.strokeWidth = 5;
-                    connector.ports = this.UtilityMethods.getWallEndPorts();
+                    diagram.addPorts(connector, this.UtilityMethods.getWallEndPorts());
                     diagram.addLabels(connector, [
                         {
                             id: '_measure_wall',
