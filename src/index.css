@@ -235,3 +235,110 @@ background-color: rgb(0, 96, 170) !important;
 color: #fff !important;
 border-color: rgb(0, 96, 170) !important;
 }
+
+/* Dialog Template Styles */
+
+.db-diagram-template-parent-text {
+  font-size: 12px;
+  color: black;
+  padding: 8px 0px;
+  padding-left: 16px;
+  cursor: pointer;
+  height: 30px;
+}
+
+.db-diagram-template-parent-text.active {
+  background-color: #EEEEEE;
+  color: #046AE5;
+}
+
+.db-diagram-template-parent-text:hover {
+  background-color: #EEEEEE;
+}
+
+.db-diagram-template-parent-text span {
+  pointer-events: none;
+}
+
+.temp-left-pane {
+  border-right:1px solid #D4D4D4; 
+  height: 424px;
+  padding: 0px;
+}
+
+.temp-right-pane {
+  height: 424px;
+}
+
+#openTemplateDialog .e-dlg-content {
+  padding: 0px;
+}
+
+
+.db-diagram-template-div {
+  padding: 10px 0px 10px 10px;
+  float: left;
+}
+
+.db-diagram-template-image-div {
+  height: 160px;
+  width: 160px;
+  background: #fff;
+  border: 1px solid #D5D5D5;
+  cursor: pointer;
+}
+
+.db-diagram-template-svg-blank-image {
+  background-color: white;
+  background-size: contain;
+  background-repeat: no-repeat;
+  width: 32px;
+  height: 32px;
+  background-position: center;
+  margin: 64px;
+  pointer-events: none;
+}
+
+.db-diagram-template-svg-image {
+    background-color: white;
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 135px;
+    height: 135px;
+    background-position: center;
+    margin: 11.5px;
+    pointer-events: none;
+}
+
+.db-diagram-template-image {
+    background-color: white;
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 135px;
+    height: 135px;
+    background-position: center;
+    margin: 11.5px;
+    pointer-events: none;
+}
+
+.db-diagram-template-image:hover {
+    border-color: #333333;
+}
+
+.db-diagram-template-text {
+  height: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  color: black;
+  padding-top: 5px;
+}
+
+.db-diagram-template-text span {
+  display: block;
+  width: 160px;
+  text-align: center;
+}
+
+
+
+
